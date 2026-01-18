@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ehtiyot qism qo‘shish</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 16px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Ehtiyot qism qo‘shish</h2>
+
+<input id="name" placeholder="Ehtiyot qism nomi" />
+<input id="price" type="number" placeholder="Narxi (so‘m)" />
+
+<button onclick="addSpare()">Saqlash</button>
+
+<script>
+  function addSpare() {
+    const name = document.getElementById("name").value;
+    const price = Number(document.getElementById("price").value);
+
+    if (!name || !price) {
+      alert("Iltimos, barcha maydonlarni to‘ldiring");
+      return;
+    }
+
+    const sales = JSON.parse(localStorage.getItem("sales") || "[]");
+    sales.push({
+      name,
+      price,
+      time: new Date().toISOString()
+    });
+
+    localStorage.setItem("sales", JSON.stringify(sales));
+
+    window.location.href = "dashboard.html";
+  }
+</script>
+
+</body>
+</html>

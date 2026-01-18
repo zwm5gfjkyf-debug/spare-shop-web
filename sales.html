@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sotuvlar ro‘yxati</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 18px;
+    }
+    .container {
+      padding: 16px;
+    }
+    .sale {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .price {
+      font-weight: bold;
+      margin-top: 6px;
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin: 16px;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>Sotuvlar ro‘yxati</header>
+
+<div class="container" id="list">
+  <!-- Sales will appear here -->
+</div>
+
+<a href="dashboard.html" class="back">⬅️ Orqaga</a>
+
+<script>
+  const sales = JSON.parse(localStorage.getItem("sales") || "[]");
+  const list = document.getElementById("list");
+
+  if (sales.length === 0) {
+    list.innerHTML = "<p>Hozircha sotuvlar yo‘q</p>";
+  } else {
+    sales.reverse().forEach(s => {
+      const date = new Date(s.time);
+      const div = document.createElement("div");
+      div.className = "sale";
+      div.innerHTML = `
+        <div><strong>${s.name}</strong></div>
+        <div class="price">${s.price} so‘m</div>
+        <div>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+</script>
+
+</body>
+</html>
