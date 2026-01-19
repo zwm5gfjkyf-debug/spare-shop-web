@@ -163,5 +163,62 @@ if (saleDate >= weekStart) {
     compare.style.color = "gray";
   }
 </script>
+  <script>
+  const firebaseConfig = {
+    apiKey: "PASTE_SAME_CONFIG",
+    authDomain: "PASTE_SAME_CONFIG",
+    projectId: "PASTE_SAME_CONFIG",
+    storageBucket: "PASTE_SAME_CONFIG",
+    messagingSenderId: "PASTE_SAME_CONFIG",
+    appId: "PASTE_SAME_CONFIG"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+    <script>
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let todayCount = 0;
+  let todayTotal = 0;
+
+  db.collection("users")
+    .doc(user.uid)
+    .collection("sales")
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!data.createdAt) return;
+
+        const saleDate = data.createdAt.toDate();
+        saleDate.setHours(0,0,0,0);
+
+        if (saleDate.getTime() === today.getTime()) {
+          todayCount++;
+          todayTotal += data.price;
+        }
+      });
+
+      document.getElementById("todayCount").innerText =
+        todayCount + " dona";
+
+      document.getElementById("todayTotal").innerText =
+        todayTotal + " so'm";
+    });
+});
+</script>
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+</script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </body>
 </html>
