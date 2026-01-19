@@ -1,225 +1,109 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <title>Bosh sahifa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
-    }
-    header {
-      background: #007bff;
-      color: white;
-      padding: 16px;
-      text-align: center;
-      font-size: 18px;
-    }
-    .container {
-      padding: 16px;
+      padding: 20px;
     }
     .card {
       background: white;
-      padding: 16px;
+      padding: 15px;
       border-radius: 10px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
     }
     .big {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
     }
-    .btn {
-      display: block;
-      text-align: center;
+    button {
+      width: 100%;
       padding: 14px;
-      background: #28a745;
+      background: #16a34a;
       color: white;
+      border: none;
       border-radius: 8px;
-      text-decoration: none;
-      font-size: 16px;
-      margin-top: 12px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-<header>Avto ehtiyot qismlar — Bosh sahifa</header>
-<a href="sales.html" class="btn" style="background:#6c757d;">
-  📋 Sotuvlar ro‘yxati
-</a>
-
-<div class="container">
-
-  <div class="card">
-    <div>Bugun sotildi</div>
-
-  </div>
-
-  <div class="card">
-    <div>Bugungi tushum</div>
-   <div class="card">
- <div class="card">
+<div class="card">
   <div>Bugun sotildi</div>
-  <div class="big" id="count">0 dona</div>
-  <div id="compare"></div>
-</div>
-<div class="card">
-  <div>Bu hafta sotildi</div>
- <div class="big"><span id="todayCount">0</span> dona</div>
-<div class="big"><span id="todayTotal">0</span> so‘m</div>
+  <div class="big"><span id="todayCount">0</span> dona</div>
 </div>
 
-<div class="card">
-  <div>Bu oy sotildi</div>
-<div class="big"><span id="todayCount">0</span> dona</div>
-<div class="big"><span id="todayTotal">0</span> so‘m</div>
-</div>
 <div class="card">
   <div>Bugungi tushum</div>
-  <div class="big" id="total">0 so‘m</div>
+  <div class="big"><span id="todayTotal">0</span> so‘m</div>
 </div>
-  </div>
 
-    <!-- dashboard updated -->
+<button onclick="goAdd()">+ Ehtiyot qism qo‘shish</button>
 
- <a href="add.html" class="btn">➕ Ehtiyot qism qo‘shish</a>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-</div>
 <script>
-  const sales = JSON.parse(localStorage.getItem("sales") || "[]");
-
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10);
-
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-  let todayCount = 0;
-  let todayTotal = 0;
-  let yesterdayCount = 0;
-
-  let weekCount = 0;
-  let weekTotal = 0;
-
-  let monthCount = 0;
-  let monthTotal = 0;
-
-  sales.forEach(s => {
-    const saleDate = new Date(s.time);
-    const saleStr = s.time.slice(0, 10);
-
-    // Today
-    if (saleStr === todayStr) {
-      todayCount++;
-      todayTotal += s.price;
-    }
-
-    // Yesterday
-    if (saleStr === yesterdayStr) {
-      yesterdayCount++;
-    }
-
-    // This week (Monday as start)
-const weekStart = new Date(now);
-const day = now.getDay() === 0 ? 6 : now.getDay() - 1;
-weekStart.setDate(now.getDate() - day);
-weekStart.setHours(0, 0, 0, 0);
-
-if (saleDate >= weekStart) {
-  weekCount++;
-  weekTotal += s.price;
-}
-
-    // This month
-    if (
-      saleDate.getMonth() === now.getMonth() &&
-      saleDate.getFullYear() === now.getFullYear()
-    ) {
-      monthCount++;
-      monthTotal += s.price;
-    }
-  });
-
-  document.getElementById("count").textContent = todayCount + " dona";
-  document.getElementById("total").textContent = todayTotal + " so‘m";
-  document.getElementById("weekCount").textContent = weekCount + " dona";
-  document.getElementById("weekTotal").textContent = weekTotal + " so‘m";
-  document.getElementById("monthCount").textContent = monthCount + " dona";
-  document.getElementById("monthTotal").textContent = monthTotal + " so‘m";
-
-  const diff = todayCount - yesterdayCount;
-  const compare = document.getElementById("compare");
-
-  if (diff > 0) {
-    compare.textContent = `Kecha bilan solishtirganda +${diff} dona`;
-    compare.style.color = "green";
-  } else if (diff < 0) {
-    compare.textContent = `Kecha bilan solishtirganda ${diff} dona`;
-    compare.style.color = "red";
-  } else {
-    compare.textContent = "Kecha bilan bir xil";
-    compare.style.color = "gray";
-  }
-</script>
-  <script>
   const firebaseConfig = {
-    apiKey: "PASTE_SAME_CONFIG",
-    authDomain: "PASTE_SAME_CONFIG",
-    projectId: "PASTE_SAME_CONFIG",
-    storageBucket: "PASTE_SAME_CONFIG",
-    messagingSenderId: "PASTE_SAME_CONFIG",
-    appId: "PASTE_SAME_CONFIG"
+    apiKey: "PASTE_YOUR_KEY",
+    authDomain: "PASTE_YOUR_DOMAIN",
+    projectId: "PASTE_YOUR_PROJECT_ID",
+    storageBucket: "PASTE_YOUR_BUCKET",
+    messagingSenderId: "PASTE_YOUR_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
   };
 
   firebase.initializeApp(firebaseConfig);
-    <script>
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  let todayCount = 0;
-  let todayTotal = 0;
-
-  db.collection("users")
-    .doc(user.uid)
-    .collection("sales")
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        if (!data.createdAt) return;
-
-        const saleDate = data.createdAt.toDate();
-        saleDate.setHours(0,0,0,0);
-
-        if (saleDate.getTime() === today.getTime()) {
-          todayCount++;
-          todayTotal += data.price;
-        }
-      });
-
-      document.getElementById("todayCount").innerText =
-        todayCount + " dona";
-
-      document.getElementById("todayTotal").innerText =
-        todayTotal + " so'm";
-    });
-});
-<script>
-  const db = firebase.firestore();
   const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    let count = 0;
+    let total = 0;
+
+    db.collection("users")
+      .doc(user.uid)
+      .collection("sales")
+      .get()
+      .then(snapshot => {
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          if (!d.createdAt) return;
+
+          const date = d.createdAt.toDate();
+          date.setHours(0,0,0,0);
+
+          if (date.getTime() === today.getTime()) {
+            count++;
+            total += d.price;
+          }
+        });
+
+        document.getElementById("todayCount").innerText = count;
+        document.getElementById("todayTotal").innerText = total;
+      });
+  });
+
+  function goAdd() {
+    window.location.href = "add.html";
+  }
 </script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 </body>
 </html>
