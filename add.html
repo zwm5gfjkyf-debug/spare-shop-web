@@ -97,10 +97,39 @@ function saveSpare(name, price) {
     appId: "YOUR_APP_ID"
   };
 
+<script>
   firebase.initializeApp(firebaseConfig);
-
   const db = firebase.firestore();
   const auth = firebase.auth();
+</script>
+  <script>
+function saveSpare() {
+  const name = document.getElementById("name").value;
+  const price = document.getElementById("price").value;
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      alert("Iltimos, qayta kiring");
+      return;
+    }
+
+    db.collection("users")
+      .doc(user.uid)
+      .collection("sales")
+      .add({
+        name: name,
+        price: Number(price),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        window.location.href = "dashboard.html";
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+  });
+}
+</script>
 </script>
 </body>
 </html>
