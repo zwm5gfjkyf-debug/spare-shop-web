@@ -1,118 +1,91 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Sotuvlar ro‘yxati</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f6f8;
+      background: #f4f6f8;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
-
-    header {
-      background: #2563eb;
-      color: white;
-      padding: 16px;
+    h2, h3 {
       text-align: center;
-      font-size: 20px;
-      font-weight: bold;
     }
-
-    .container {
-      padding: 16px;
+    canvas {
       max-width: 900px;
-      margin: auto;
-    }
-
-    .sale {
+      margin: 20px auto;
+      display: block;
       background: white;
       border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 10px;
+    }
+    #salesList {
+      max-width: 900px;
+      margin: 20px auto;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .sale {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
     }
-
-    .sale-name {
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .sale-date {
-      font-size: 12px;
-      color: gray;
-    }
-
-    .sale-price {
-      font-size: 16px;
-      font-weight: bold;
-      color: #16a34a;
-    }
-
     .back-btn {
       display: block;
-      margin: 20px auto;
-      text-align: center;
-      padding: 12px;
-      background: #2563eb;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
       max-width: 200px;
+      margin: 20px auto;
+      padding: 12px;
+      text-align: center;
+      background: #3b6df6;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <div style="max-width: 900px; margin: 20px auto;">
-  <h2 style="text-align:center;">📊 Bugungi savdo grafigi</h2>
-  <canvas id="dailySalesChart"></canvas>
-</div>
 </head>
+
 <body>
 
-  <header>📋 Sotuvlar ro‘yxati</header>
+<h2>📊 Bugungi savdo grafigi</h2>
+<canvas id="dailySalesChart"></canvas>
 
-  <div class="container" id="salesList">
-    Yuklanmoqda...
-  </div>
+<h3>📋 Sotuvlar ro‘yxati</h3>
+<div id="salesList">Yuklanmoqda...</div>
 
-  <a class="back-btn" href="dashboard.html">⬅ Orqaga</a>
+<a href="dashboard.html" class="back-btn">← Orqaga</a>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- 🔹 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <script>
-   const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
-};
+<!-- 🔹 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-  const ctx = document.getElementById('dailySalesChart').getContext('2d');
+<script>
+  const firebaseConfig = {
+    // 🔥 PASTE YOUR firebaseConfig HERE
+  };
 
-  async function loadDailySalesChart() {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    const startOfDay = new Date();
-    startOfDay.setHours(0,0,0,0);
+  const ctx = document.getElementById("dailySalesChart").getContext("2d");
+
+  async function loadDailySalesChart(uid) {
+    const start = new Date();
+    start.setHours(0,0,0,0);
 
     const snapshot = await db.collection("sales")
-      .where("userId", "==", user.uid)
-      .where("createdAt", ">=", startOfDay)
+      .where("userId", "==", uid)
+      .where("createdAt", ">=", start)
       .orderBy("createdAt")
       .get();
 
@@ -123,103 +96,73 @@
     snapshot.forEach(doc => {
       const sale = doc.data();
       const time = sale.createdAt.toDate().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit'
+        hour: "2-digit",
+        minute: "2-digit"
       });
-
       total += sale.price;
       labels.push(time);
-      data.push(total); // cumulative = trend
+      data.push(total);
     });
 
     new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
-        labels: labels,
+        labels,
         datasets: [{
-          label: 'Savdo (so‘m)',
-          data: data,
-          borderColor: '#4CAF50',
-          backgroundColor: 'rgba(76,175,80,0.15)',
-          tension: 0.4,
+          data,
+          borderColor: "#4CAF50",
+          backgroundColor: "rgba(76,175,80,0.15)",
           fill: true,
-          pointRadius: 4
+          tension: 0.4
         }]
       },
       options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
+        plugins: { legend: { display: false } },
         scales: {
           y: {
-            ticks: {
-              callback: value => value + " so‘m"
-            }
+            ticks: { callback: v => v + " so‘m" }
           }
         }
       }
     });
   }
 
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) loadDailySalesChart();
+  function loadSalesList(uid) {
+    const list = document.getElementById("salesList");
+    list.innerHTML = "";
+
+    db.collection("sales")
+      .where("userId", "==", uid)
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snapshot => {
+        list.innerHTML = "";
+        if (snapshot.empty) {
+          list.innerHTML = "Hozircha sotuvlar yo‘q";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const s = doc.data();
+          const div = document.createElement("div");
+          div.className = "sale";
+          div.innerHTML = `
+            <span>${s.name}</span>
+            <strong>${s.price} so‘m</strong>
+          `;
+          list.appendChild(div);
+        });
+      });
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+    loadDailySalesChart(user.uid);
+    loadSalesList(user.uid);
   });
 </script>
-
-
-    firebase.initializeApp(firebaseConfig);
-
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      loadSales(user.uid);
-    });
-
-    function loadSales(uid) {
-      const list = document.getElementById("salesList");
-      list.innerHTML = "";
-
-      db.collection("users")
-        .doc(uid)
-        .collection("sales")
-        .orderBy("createdAt", "desc")
-        .onSnapshot(snapshot => {
-          if (snapshot.empty) {
-            list.innerHTML = "Hozircha sotuvlar yo‘q";
-            return;
-          }
-
-          list.innerHTML = "";
-
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            const date = data.createdAt
-              ? data.createdAt.toDate().toLocaleString()
-              : "";
-
-            const div = document.createElement("div");
-            div.className = "sale";
-
-            div.innerHTML = `
-              <div>
-                <div class="sale-name">${data.name}</div>
-                <div class="sale-date">${date}</div>
-              </div>
-              <div class="sale-price">${data.price} so‘m</div>
-            `;
-
-            list.appendChild(div);
-          });
-        });
-    }
-  </script>
 
 </body>
 </html>
