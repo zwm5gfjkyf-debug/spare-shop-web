@@ -89,6 +89,19 @@
       background: #2563eb;
       color: white;
     }
+    /* Smooth app-like animation */
+.big, .card, button {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.big:hover, .card:hover, button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+
+button:active {
+  transform: scale(0.98);
+}
   </style>
 </head>
 <body>
