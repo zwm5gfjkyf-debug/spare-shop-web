@@ -1,48 +1,150 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<title>Mahsulot qo‘shish</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family:Arial; background:#f5f5f5; }
-.box { max-width:360px; margin:60px auto; background:white; padding:20px; border-radius:14px; }
-input,button { width:100%; padding:14px; margin-top:12px; font-size:16px; }
-button { background:#2563eb; color:white; border:none; border-radius:10px; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Mahsulot qo‘shish</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      width: 100%;
+      max-width: 380px;
+      padding: 24px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    label {
+      font-size: 14px;
+      color: #555;
+      margin-top: 12px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 6px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .save {
+      background: #16a34a;
+      color: white;
+    }
+
+    .back {
+      background: #2563eb;
+      color: white;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
 <div class="box">
   <h2>Mahsulot qo‘shish</h2>
-  <input id="name" placeholder="Mahsulot nomi">
-  <input id="price" type="number" placeholder="Narxi (so‘m)">
-  <button onclick="save()">Saqlash</button>
+
+  <label>Mahsulot nomi</label>
+  <input id="name" placeholder="Masalan: Motor">
+
+  <label>Narxi (so‘m)</label>
+  <input id="price" type="number" placeholder="Masalan: 20000">
+
+  <button class="save" onclick="saveSpare()">Saqlash</button>
+  <button class="back" onclick="goBack()">⬅ Orqaga</button>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig = { /* SAME CONFIG */ };
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
+  // 🔴 PASTE YOUR REAL firebaseConfig HERE
+  const firebaseConfig = {
+    apiKey: "PASTE_KEY",
+    authDomain: "PASTE_DOMAIN",
+    projectId: "PASTE_PROJECT_ID",
+    storageBucket: "PASTE_BUCKET",
+    messagingSenderId: "PASTE_SENDER_ID",
+    appId: "PASTE_APP_ID"
+  };
 
-function save(){
-  const n=name.value.trim();
-  const p=Number(price.value);
-  if(!n||!p){ alert("Ma’lumot to‘liq emas"); return; }
+  firebase.initializeApp(firebaseConfig);
 
-  const u=auth.currentUser;
-  if(!u){ location.href="index.html"; return; }
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  db.collection("users").doc(u.uid).collection("sales").add({
-    name:n, price:p,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>location.href="dashboard.html");
-}
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "index.html";
+    }
+  });
+
+  function saveSpare() {
+    const name = document.getElementById("name").value.trim();
+    const price = Number(document.getElementById("price").value);
+
+    if (!name || !price) {
+      alert("Iltimos, barcha maydonlarni to‘ldiring");
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Iltimos, qayta kiring");
+      window.location.href = "index.html";
+      return;
+    }
+
+    db.collection("users")
+      .doc(user.uid)
+      .collection("sales")
+      .add({
+        name: name,
+        price: price,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        window.location.href = "dashboard.html";
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  }
+
+  function goBack() {
+    window.location.href = "dashboard.html";
+  }
 </script>
 
 </body>
