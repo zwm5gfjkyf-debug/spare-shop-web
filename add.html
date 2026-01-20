@@ -79,7 +79,7 @@
   <label>Narxi (so‘m)</label>
   <input id="price" type="number" placeholder="Masalan: 20000">
 
-  <button class="save" onclick="saveSpare()">Saqlash</button>
+<button id="saveBtn" class="save" onclick="saveSpare()">Saqlash</button>
   <button class="back" onclick="goBack()">⬅ Orqaga</button>
 </div>
 
@@ -110,37 +110,49 @@ const firebaseConfig = {
     }
   });
 
-  function saveSpare() {
-    const name = document.getElementById("name").value.trim();
-    const price = Number(document.getElementById("price").value);
+ function saveSpare() {
+  const btn = document.getElementById("saveBtn");
 
-    if (!name || !price) {
-      alert("Iltimos, barcha maydonlarni to‘ldiring");
-      return;
-    }
+  // ⛔ Prevent double click
+  if (btn.disabled) return;
 
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Iltimos, qayta kiring");
-      window.location.href = "index.html";
-      return;
-    }
+  btn.disabled = true;
+  btn.innerText = "Saqlanmoqda...";
 
-    db.collection("users")
-      .doc(user.uid)
-      .collection("sales")
-      .add({
-        name: name,
-        price: price,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(error => {
-        alert(error.message);
-      });
+  const name = document.getElementById("name").value.trim();
+  const price = Number(document.getElementById("price").value);
+
+  if (!name || !price) {
+    alert("Iltimos, barcha maydonlarni to‘ldiring");
+    btn.disabled = false;
+    btn.innerText = "Saqlash";
+    return;
   }
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Qayta kiring");
+    window.location.href = "index.html";
+    return;
+  }
+
+  db.collection("users")
+    .doc(user.uid)
+    .collection("sales")
+    .add({
+      name: name,
+      price: price,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      window.location.href = "dashboard.html";
+    })
+    .catch(error => {
+      alert(error.message);
+      btn.disabled = false;
+      btn.innerText = "Saqlash";
+    });
+}
 
   function goBack() {
     window.location.href = "dashboard.html";
