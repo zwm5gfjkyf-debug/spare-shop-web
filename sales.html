@@ -67,6 +67,12 @@
       max-width: 200px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <div style="max-width: 900px; margin: 20px auto;">
+  <h2 style="text-align:center;">📊 Bugungi savdo grafigi</h2>
+  <canvas id="dailySalesChart"></canvas>
+</div>
 </head>
 <body>
 
@@ -93,6 +99,73 @@
   appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
   measurementId: "G-E762WWCRKB"
 };
+
+    <script>
+  const ctx = document.getElementById('dailySalesChart').getContext('2d');
+
+  async function loadDailySalesChart() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
+
+    const snapshot = await db.collection("sales")
+      .where("userId", "==", user.uid)
+      .where("createdAt", ">=", startOfDay)
+      .orderBy("createdAt")
+      .get();
+
+    let labels = [];
+    let data = [];
+    let total = 0;
+
+    snapshot.forEach(doc => {
+      const sale = doc.data();
+      const time = sale.createdAt.toDate().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      total += sale.price;
+      labels.push(time);
+      data.push(total); // cumulative = trend
+    });
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Savdo (so‘m)',
+          data: data,
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76,175,80,0.15)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: value => value + " so‘m"
+            }
+          }
+        }
+      }
+    });
+  }
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) loadDailySalesChart();
+  });
+</script>
 
 
     firebase.initializeApp(firebaseConfig);
