@@ -4,73 +4,148 @@
   <meta charset="UTF-8" />
   <title>Sotuvlar ro‘yxati</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      background: #f5f6f8;
       margin: 0;
+      padding: 0;
     }
+
     header {
-      background: #007bff;
+      background: #2563eb;
       color: white;
       padding: 16px;
       text-align: center;
-      font-size: 18px;
+      font-size: 20px;
+      font-weight: bold;
     }
+
     .container {
       padding: 16px;
+      max-width: 900px;
+      margin: auto;
     }
+
     .sale {
       background: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .price {
-      font-weight: bold;
-      margin-top: 6px;
-    }
-    .back {
-      display: block;
-      text-align: center;
-      margin: 16px;
-      text-decoration: none;
-      color: #007bff;
+
+    .sale-name {
       font-size: 16px;
+      font-weight: bold;
+    }
+
+    .sale-date {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .sale-price {
+      font-size: 16px;
+      font-weight: bold;
+      color: #16a34a;
+    }
+
+    .back-btn {
+      display: block;
+      margin: 20px auto;
+      text-align: center;
+      padding: 12px;
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      max-width: 200px;
     }
   </style>
 </head>
 <body>
 
-<header>Sotuvlar ro‘yxati</header>
+  <header>📋 Sotuvlar ro‘yxati</header>
 
-<div class="container" id="list">
-  <!-- Sales will appear here -->
-</div>
+  <div class="container" id="salesList">
+    Yuklanmoqda...
+  </div>
 
-<a href="dashboard.html" class="back">⬅️ Orqaga</a>
+  <a class="back-btn" href="dashboard.html">⬅ Orqaga</a>
 
-<script>
-  const sales = JSON.parse(localStorage.getItem("sales") || "[]");
-  const list = document.getElementById("list");
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  if (sales.length === 0) {
-    list.innerHTML = "<p>Hozircha sotuvlar yo‘q</p>";
-  } else {
-    sales.reverse().forEach(s => {
-      const date = new Date(s.time);
-      const div = document.createElement("div");
-      div.className = "sale";
-      div.innerHTML = `
-        <div><strong>${s.name}</strong></div>
-        <div class="price">${s.price} so‘m</div>
-        <div>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
-      `;
-      list.appendChild(div);
+  <script>
+    // 🔴 REPLACE WITH YOUR REAL CONFIG
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      loadSales(user.uid);
     });
-  }
-</script>
+
+    function loadSales(uid) {
+      const list = document.getElementById("salesList");
+      list.innerHTML = "";
+
+      db.collection("users")
+        .doc(uid)
+        .collection("sales")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          if (snapshot.empty) {
+            list.innerHTML = "Hozircha sotuvlar yo‘q";
+            return;
+          }
+
+          list.innerHTML = "";
+
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const date = data.createdAt
+              ? data.createdAt.toDate().toLocaleString()
+              : "";
+
+            const div = document.createElement("div");
+            div.className = "sale";
+
+            div.innerHTML = `
+              <div>
+                <div class="sale-name">${data.name}</div>
+                <div class="sale-date">${date}</div>
+              </div>
+              <div class="sale-price">${data.price} so‘m</div>
+            `;
+
+            list.appendChild(div);
+          });
+        });
+    }
+  </script>
 
 </body>
 </html>
