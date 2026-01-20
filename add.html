@@ -1,99 +1,48 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Ehtiyot qism qo‘shish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .box {
-      max-width: 400px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    button {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Mahsulot qo‘shish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family:Arial; background:#f5f5f5; }
+.box { max-width:360px; margin:60px auto; background:white; padding:20px; border-radius:14px; }
+input,button { width:100%; padding:14px; margin-top:12px; font-size:16px; }
+button { background:#2563eb; color:white; border:none; border-radius:10px; }
+</style>
 </head>
 <body>
 
 <div class="box">
-  <h2>Ehtiyot qism qo‘shish</h2>
-
-  <input id="name" placeholder="Nomi (masalan: Motor)">
+  <h2>Mahsulot qo‘shish</h2>
+  <input id="name" placeholder="Mahsulot nomi">
   <input id="price" type="number" placeholder="Narxi (so‘m)">
-
-  <button onclick="saveSpare()">Saqlash</button>
+  <button onclick="save()">Saqlash</button>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "PASTE_YOUR_KEY",
-    authDomain: "PASTE_YOUR_DOMAIN",
-    projectId: "PASTE_YOUR_PROJECT_ID",
-    storageBucket: "PASTE_YOUR_BUCKET",
-    messagingSenderId: "PASTE_YOUR_SENDER_ID",
-    appId: "PASTE_YOUR_APP_ID"
-  };
+const firebaseConfig = { /* SAME CONFIG */ };
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
+function save(){
+  const n=name.value.trim();
+  const p=Number(price.value);
+  if(!n||!p){ alert("Ma’lumot to‘liq emas"); return; }
 
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  const u=auth.currentUser;
+  if(!u){ location.href="index.html"; return; }
 
-  function saveSpare() {
-    const name = document.getElementById("name").value.trim();
-    const price = document.getElementById("price").value;
-
-    if (!name || !price) {
-      alert("Barcha maydonlarni to‘ldiring");
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      alert("Qayta kiring");
-      window.location.href = "index.html";
-      return;
-    }
-
-    db.collection("users")
-      .doc(user.uid)
-      .collection("sales")
-      .add({
-        name: name,
-        price: Number(price),
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        alert(err.message);
-      });
-  }
+  db.collection("users").doc(u.uid).collection("sales").add({
+    name:n, price:p,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>location.href="dashboard.html");
+}
 </script>
 
 </body>
