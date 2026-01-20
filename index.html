@@ -1,46 +1,147 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
-    body { font-family: Arial; background:#f5f5f5; }
-    .box { max-width:360px; margin:80px auto; background:#fff; padding:20px; border-radius:12px; }
-    input,button { width:100%; padding:12px; margin-top:10px; font-size:16px; }
-    button { background:#2563eb; color:white; border:none; border-radius:8px; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      width: 100%;
+      max-width: 360px;
+      padding: 26px;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      margin-top: 14px;
+      font-size: 18px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .login {
+      background: #2563eb;
+      color: white;
+    }
+
+    .register {
+      background: #16a34a;
+      color: white;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
 
 <div class="box">
   <h2>Kirish / Ro‘yxatdan o‘tish</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Parol">
-  <button onclick="login()">Kirish</button>
-  <button onclick="register()">Ro‘yxatdan o‘tish</button>
+
+  <input id="email" type="email" placeholder="Email (login)">
+  <input id="password" type="password" placeholder="Parol (kamida 6 belgi)">
+
+  <button class="login" onclick="login()">Kirish</button>
+  <button class="register" onclick="register()">Ro‘yxatdan o‘tish</button>
+
+  <div class="note">
+    Bir marta ro‘yxatdan o‘ting — keyin har doim shu hisob bilan kirasiz
+  </div>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-  const firebaseConfig = { /* PASTE CONFIG */ };
+  // 🔴 PASTE YOUR REAL firebaseConfig HERE
+  const firebaseConfig = {
+    apiKey: "PASTE_KEY",
+    authDomain: "PASTE_DOMAIN",
+    projectId: "PASTE_PROJECT_ID",
+    storageBucket: "PASTE_BUCKET",
+    messagingSenderId: "PASTE_SENDER_ID",
+    appId: "PASTE_APP_ID"
+  };
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
+  // If already logged in → go directly to dashboard
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      window.location.href = "dashboard.html";
+    }
+  });
+
   function login() {
-    auth.signInWithEmailAndPassword(
-      email.value, password.value
-    ).then(() => location.href="dashboard.html")
-     .catch(e => alert(e.message));
+    const e = document.getElementById("email").value.trim();
+    const p = document.getElementById("password").value;
+
+    if (!e || !p) {
+      alert("Email va parolni kiriting");
+      return;
+    }
+
+    auth.signInWithEmailAndPassword(e, p)
+      .then(() => {
+        window.location.href = "dashboard.html";
+      })
+      .catch(err => {
+        alert(err.message);
+      });
   }
 
   function register() {
-    auth.createUserWithEmailAndPassword(
-      email.value, password.value
-    ).then(() => location.href="dashboard.html")
-     .catch(e => alert(e.message));
+    const e = document.getElementById("email").value.trim();
+    const p = document.getElementById("password").value;
+
+    if (!e || !p) {
+      alert("Email va parolni kiriting");
+      return;
+    }
+
+    auth.createUserWithEmailAndPassword(e, p)
+      .then(() => {
+        window.location.href = "dashboard.html";
+      })
+      .catch(err => {
+        alert(err.message);
+      });
   }
 </script>
 
