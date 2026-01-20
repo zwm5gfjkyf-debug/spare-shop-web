@@ -12,164 +12,181 @@
       margin: 0;
       padding: 20px;
     }
+
     h2, h3 {
       text-align: center;
+      margin-top: 10px;
     }
+
     canvas {
       max-width: 900px;
       margin: 20px auto;
       display: block;
-      background: white;
-      border-radius: 10px;
+      background: #ffffff;
+      border-radius: 12px;
       padding: 10px;
     }
+
     #salesList {
       max-width: 900px;
       margin: 20px auto;
-      background: white;
+      background: #ffffff;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
     }
+
     .sale {
       display: flex;
       justify-content: space-between;
       padding: 10px;
       border-bottom: 1px solid #eee;
+      font-size: 15px;
     }
+
+    .sale:last-child {
+      border-bottom: none;
+    }
+
     .back-btn {
       display: block;
-      max-width: 200px;
-      margin: 20px auto;
+      max-width: 220px;
+      margin: 25px auto;
       padding: 12px;
       text-align: center;
       background: #3b6df6;
       color: white;
       text-decoration: none;
       border-radius: 8px;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-<h2>📊 Bugungi savdo grafigi</h2>
-<canvas id="dailySalesChart"></canvas>
+  <h2>📊 Bugungi savdo grafigi</h2>
+  <canvas id="dailySalesChart"></canvas>
 
-<h3>📋 Sotuvlar ro‘yxati</h3>
-<div id="salesList">Yuklanmoqda...</div>
+  <h3>📋 Sotuvlar ro‘yxati</h3>
+  <div id="salesList">Yuklanmoqda...</div>
 
-<a href="dashboard.html" class="back-btn">← Orqaga</a>
+  <a href="dashboard.html" class="back-btn">← Orqaga</a>
 
-<!-- 🔹 Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- 🔹 Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- 🔹 Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 🔹 Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
- const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
-};
+  <script>
+    const firebaseConfig = {
+      /* 🔥 PASTE YOUR firebaseConfig HERE */
+    };
 
+    firebase.initializeApp(firebaseConfig);
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  const ctx = document.getElementById("dailySalesChart").getContext("2d");
+    const ctx = document
+      .getElementById("dailySalesChart")
+      .getContext("2d");
 
-  async function loadDailySalesChart(uid) {
-    const start = new Date();
-    start.setHours(0,0,0,0);
+    async function loadDailySalesChart(uid) {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
 
-    const snapshot = await db.collection("sales")
-      .where("userId", "==", uid)
-      .where("createdAt", ">=", start)
-      .orderBy("createdAt")
-      .get();
+      const snapshot = await db
+        .collection("users")
+        .doc(uid)
+        .collection("sales")
+        .where("createdAt", ">=", start)
+        .orderBy("createdAt")
+        .get();
 
-    let labels = [];
-    let data = [];
-    let total = 0;
+      let labels = [];
+      let data = [];
+      let total = 0;
 
-    snapshot.forEach(doc => {
-      const sale = doc.data();
-      const time = sale.createdAt.toDate().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
+      snapshot.forEach(doc => {
+        const sale = doc.data();
+        const time = sale.createdAt
+          .toDate()
+          .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+        total += sale.price;
+        labels.push(time);
+        data.push(total);
       });
-      total += sale.price;
-      labels.push(time);
-      data.push(total);
-    });
 
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          data,
-          borderColor: "#4CAF50",
-          backgroundColor: "rgba(76,175,80,0.15)",
-          fill: true,
-          tension: 0.4
-        }]
-      },
-      options: {
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            ticks: { callback: v => v + " so‘m" }
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            data,
+            borderColor: "#4CAF50",
+            backgroundColor: "rgba(76,175,80,0.15)",
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: value => value + " so‘m"
+              }
+            }
           }
         }
-      }
-    });
-  }
-
-  function loadSalesList(uid) {
-    const list = document.getElementById("salesList");
-    list.innerHTML = "";
-
-    db.collection("sales")
-      .where("userId", "==", uid)
-      .orderBy("createdAt", "desc")
-      .onSnapshot(snapshot => {
-        list.innerHTML = "";
-        if (snapshot.empty) {
-          list.innerHTML = "Hozircha sotuvlar yo‘q";
-          return;
-        }
-
-        snapshot.forEach(doc => {
-          const s = doc.data();
-          const div = document.createElement("div");
-          div.className = "sale";
-          div.innerHTML = `
-            <span>${s.name}</span>
-            <strong>${s.price} so‘m</strong>
-          `;
-          list.appendChild(div);
-        });
       });
-  }
-
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "index.html";
-      return;
     }
-    loadDailySalesChart(user.uid);
-    loadSalesList(user.uid);
-  });
-</script>
+
+    function loadSalesList(uid) {
+      const list = document.getElementById("salesList");
+
+      db.collection("users")
+        .doc(uid)
+        .collection("sales")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          list.innerHTML = "";
+
+          if (snapshot.empty) {
+            list.innerHTML = "Hozircha sotuvlar yo‘q";
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const sale = doc.data();
+            const div = document.createElement("div");
+            div.className = "sale";
+            div.innerHTML = `
+              <span>${sale.name}</span>
+              <strong>${sale.price} so‘m</strong>
+            `;
+            list.appendChild(div);
+          });
+        });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+      loadDailySalesChart(user.uid);
+      loadSalesList(user.uid);
+    });
+  </script>
 
 </body>
 </html>
