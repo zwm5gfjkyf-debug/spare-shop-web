@@ -1,94 +1,209 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<title>Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family:Arial; background:#f1f5f9; margin:0; padding:16px; }
-.top { display:flex; gap:12px; }
-.big { flex:1; padding:20px; border-radius:14px; color:white; }
-.green { background:#16a34a; }
-.blue { background:#2563eb; }
-.cards { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.card { background:white; padding:16px; border-radius:12px; }
-button { width:100%; margin-top:20px; padding:16px; font-size:18px; background:#16a34a; color:white; border:none; border-radius:12px; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      padding: 16px;
+    }
+
+    .top {
+      display: flex;
+      gap: 12px;
+    }
+
+    .big {
+      flex: 1;
+      padding: 20px;
+      border-radius: 16px;
+      color: white;
+    }
+
+    .left {
+      background: #16a34a;
+    }
+
+    .right {
+      background: #2563eb;
+    }
+
+    .big h1 {
+      margin: 10px 0 0;
+      font-size: 28px;
+    }
+
+    .cards {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: white;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .actions {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    button {
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .add {
+      background: #16a34a;
+      color: white;
+    }
+
+    .list {
+      background: #2563eb;
+      color: white;
+    }
+  </style>
 </head>
 <body>
 
-<div class="top">
-  <div class="big green">
-    <div>Bugun sotildi</div>
-    <h1 id="todayCount">0 dona</h1>
+  <!-- TOP -->
+  <div class="top">
+    <div class="big left">
+      Bugun sotildi
+      <h1 id="todayCount">0 dona</h1>
+    </div>
+    <div class="big right">
+      Bugungi tushum
+      <h1 id="todayTotal">0 so‘m</h1>
+    </div>
   </div>
-  <div class="big blue">
-    <div>Bugungi tushum</div>
-    <h1 id="todayTotal">0 so‘m</h1>
+
+  <!-- MIDDLE -->
+  <div class="cards">
+    <div class="card">
+      <h3>Bu hafta</h3>
+      <p id="weekData">0 dona / 0 so‘m</p>
+    </div>
+    <div class="card">
+      <h3>Bu oy</h3>
+      <p id="monthData">0 dona / 0 so‘m</p>
+    </div>
+    <div class="card">
+      <h3>Eng ko‘p sotilgan</h3>
+      <p id="topProduct">—</p>
+    </div>
   </div>
-</div>
 
-<div class="cards">
-  <div class="card">
-    <h3>Bu hafta</h3>
-    <div id="weekData">0 dona / 0 so‘m</div>
+  <!-- BOTTOM -->
+  <div class="actions">
+    <button class="add" onclick="location.href='add.html'">
+      + Mahsulot qo‘shish
+    </button>
+    <button class="list" onclick="location.href='sales.html'">
+      📋 Sotuvlar ro‘yxati
+    </button>
   </div>
-  <div class="card">
-    <h3>Bu oy</h3>
-    <div id="monthData">0 dona / 0 so‘m</div>
-  </div>
-  <div class="card">
-    <h3>Eng ko‘p sotilgan</h3>
-    <div id="topProduct">—</div>
-  </div>
-</div>
 
-<button onclick="location.href='add.html'">+ Mahsulot qo‘shish</button>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // 🔴 PASTE YOUR REAL firebaseConfig HERE
+    const firebaseConfig = {
+      apiKey: "PASTE_KEY",
+      authDomain: "PASTE_DOMAIN",
+      projectId: "PASTE_PROJECT_ID",
+      storageBucket: "PASTE_BUCKET",
+      messagingSenderId: "PASTE_SENDER",
+      appId: "PASTE_APP_ID"
+    };
 
-<script>
-const firebaseConfig = { /* SAME CONFIG */ };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
 
-auth.onAuthStateChanged(user => {
-  if(!user){ location.href="index.html"; return; }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  const now = new Date();
-  const today = new Date(now); today.setHours(0,0,0,0);
-  const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-6);
-  const monthAgo = new Date(today); monthAgo.setDate(1);
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
 
-  let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
-  const products={};
-
-  db.collection("users").doc(user.uid).collection("sales").get()
-  .then(snap=>{
-    snap.forEach(d=>{
-      const s=d.data(); if(!s.createdAt) return;
-      const dt=s.createdAt.toDate(); dt.setHours(0,0,0,0);
-
-      products[s.name]=(products[s.name]||0)+1;
-
-      if(dt.getTime()===today.getTime()){ tC++; tS+=s.price; }
-      if(dt>=weekAgo){ wC++; wS+=s.price; }
-      if(dt>=monthAgo){ mC++; mS+=s.price; }
+      loadDashboard(user.uid);
     });
 
-    todayCount.innerText=`${tC} dona`;
-    todayTotal.innerText=`${tS} so‘m`;
-    weekData.innerText=`${wC} dona / ${wS} so‘m`;
-    monthData.innerText=`${mC} dona / ${mS} so‘m`;
+    function loadDashboard(uid) {
+      const now = new Date();
+      const today = new Date(now); today.setHours(0,0,0,0);
+      const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
+      const monthStart = new Date(today); monthStart.setDate(1);
 
-    const top=Object.entries(products).sort((a,b)=>b[1]-a[1])[0];
-    topProduct.innerText=top?`${top[0]} (${top[1]} marta)`:"—";
-  });
-});
-</script>
+      let tC=0, tS=0, wC=0, wS=0, mC=0, mS=0;
+      const productCount = {};
+
+      db.collection("users").doc(uid).collection("sales").get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            const s = doc.data();
+            if (!s.createdAt) return;
+
+            const d = s.createdAt.toDate();
+            d.setHours(0,0,0,0);
+
+            productCount[s.name] = (productCount[s.name] || 0) + 1;
+
+            if (d.getTime() === today.getTime()) {
+              tC++; tS += s.price;
+            }
+            if (d >= weekStart) {
+              wC++; wS += s.price;
+            }
+            if (d >= monthStart) {
+              mC++; mS += s.price;
+            }
+          });
+
+          todayCount.innerText = tC + " dona";
+          todayTotal.innerText = tS + " so‘m";
+          weekData.innerText = wC + " dona / " + wS + " so‘m";
+          monthData.innerText = mC + " dona / " + mS + " so‘m";
+
+          const top = Object.entries(productCount)
+            .sort((a,b) => b[1]-a[1])[0];
+
+          topProduct.innerText = top
+            ? top[0] + " (" + top[1] + " marta)"
+            : "—";
+        });
+    }
+  </script>
 
 </body>
 </html>
