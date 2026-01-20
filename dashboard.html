@@ -1,108 +1,93 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-    }
-    .big {
-      font-size: 28px;
-      font-weight: bold;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family:Arial; background:#f1f5f9; margin:0; padding:16px; }
+.top { display:flex; gap:12px; }
+.big { flex:1; padding:20px; border-radius:14px; color:white; }
+.green { background:#16a34a; }
+.blue { background:#2563eb; }
+.cards { margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.card { background:white; padding:16px; border-radius:12px; }
+button { width:100%; margin-top:20px; padding:16px; font-size:18px; background:#16a34a; color:white; border:none; border-radius:12px; }
+</style>
 </head>
 <body>
 
-<div class="card">
-  <div>Bugun sotildi</div>
-  <div class="big"><span id="todayCount">0</span> dona</div>
+<div class="top">
+  <div class="big green">
+    <div>Bugun sotildi</div>
+    <h1 id="todayCount">0 dona</h1>
+  </div>
+  <div class="big blue">
+    <div>Bugungi tushum</div>
+    <h1 id="todayTotal">0 so‘m</h1>
+  </div>
 </div>
 
-<div class="card">
-  <div>Bugungi tushum</div>
-  <div class="big"><span id="todayTotal">0</span> so‘m</div>
+<div class="cards">
+  <div class="card">
+    <h3>Bu hafta</h3>
+    <div id="weekData">0 dona / 0 so‘m</div>
+  </div>
+  <div class="card">
+    <h3>Bu oy</h3>
+    <div id="monthData">0 dona / 0 so‘m</div>
+  </div>
+  <div class="card">
+    <h3>Eng ko‘p sotilgan</h3>
+    <div id="topProduct">—</div>
+  </div>
 </div>
 
-<button onclick="goAdd()">+ Ehtiyot qism qo‘shish</button>
+<button onclick="location.href='add.html'">+ Mahsulot qo‘shish</button>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "PASTE_YOUR_KEY",
-    authDomain: "PASTE_YOUR_DOMAIN",
-    projectId: "PASTE_YOUR_PROJECT_ID",
-    storageBucket: "PASTE_YOUR_BUCKET",
-    messagingSenderId: "PASTE_YOUR_SENDER_ID",
-    appId: "PASTE_YOUR_APP_ID"
-  };
+const firebaseConfig = { /* SAME CONFIG */ };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
+auth.onAuthStateChanged(user => {
+  if(!user){ location.href="index.html"; return; }
 
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+  const now = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-6);
+  const monthAgo = new Date(today); monthAgo.setDate(1);
 
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "index.html";
-      return;
-    }
+  let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
+  const products={};
 
-    const today = new Date();
-    today.setHours(0,0,0,0);
+  db.collection("users").doc(user.uid).collection("sales").get()
+  .then(snap=>{
+    snap.forEach(d=>{
+      const s=d.data(); if(!s.createdAt) return;
+      const dt=s.createdAt.toDate(); dt.setHours(0,0,0,0);
 
-    let count = 0;
-    let total = 0;
+      products[s.name]=(products[s.name]||0)+1;
 
-    db.collection("users")
-      .doc(user.uid)
-      .collection("sales")
-      .get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          if (!d.createdAt) return;
+      if(dt.getTime()===today.getTime()){ tC++; tS+=s.price; }
+      if(dt>=weekAgo){ wC++; wS+=s.price; }
+      if(dt>=monthAgo){ mC++; mS+=s.price; }
+    });
 
-          const date = d.createdAt.toDate();
-          date.setHours(0,0,0,0);
+    todayCount.innerText=`${tC} dona`;
+    todayTotal.innerText=`${tS} so‘m`;
+    weekData.innerText=`${wC} dona / ${wS} so‘m`;
+    monthData.innerText=`${mC} dona / ${mS} so‘m`;
 
-          if (date.getTime() === today.getTime()) {
-            count++;
-            total += d.price;
-          }
-        });
-
-        document.getElementById("todayCount").innerText = count;
-        document.getElementById("todayTotal").innerText = total;
-      });
+    const top=Object.entries(products).sort((a,b)=>b[1]-a[1])[0];
+    topProduct.innerText=top?`${top[0]} (${top[1]} marta)`:"—";
   });
-
-  function goAdd() {
-    window.location.href = "add.html";
-  }
+});
 </script>
 
 </body>
