@@ -1,106 +1,46 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: #fff;
-      padding: 24px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-    }
-    .secondary {
-      background: #6c757d;
-    }
-    .msg {
-      margin-top: 10px;
-      color: red;
-    }
+    body { font-family: Arial; background:#f5f5f5; }
+    .box { max-width:360px; margin:80px auto; background:#fff; padding:20px; border-radius:12px; }
+    input,button { width:100%; padding:12px; margin-top:10px; font-size:16px; }
+    button { background:#2563eb; color:white; border:none; border-radius:8px; }
   </style>
 </head>
 <body>
 
 <div class="box">
   <h2>Kirish / Ro‘yxatdan o‘tish</h2>
-
-  <input id="email" type="email" placeholder="Email (login)" />
-  <input id="password" type="password" placeholder="Parol" />
-
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Parol">
   <button onclick="login()">Kirish</button>
-  <button class="secondary" onclick="register()">Ro‘yxatdan o‘tish</button>
-
-  <div class="msg" id="msg"></div>
+  <button onclick="register()">Ro‘yxatdan o‘tish</button>
 </div>
 
-<script>
- const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
-};
-  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+<script>
+  const firebaseConfig = { /* PASTE CONFIG */ };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
   function login() {
-    const e = document.getElementById("email").value;
-    const p = document.getElementById("password").value;
-
-    auth.signInWithEmailAndPassword(e, p)
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        msg.textContent = err.message;
-      });
+    auth.signInWithEmailAndPassword(
+      email.value, password.value
+    ).then(() => location.href="dashboard.html")
+     .catch(e => alert(e.message));
   }
 
   function register() {
-    const e = document.getElementById("email").value;
-    const p = document.getElementById("password").value;
-
-    auth.createUserWithEmailAndPassword(e, p)
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        msg.textContent = err.message;
-      });
+    auth.createUserWithEmailAndPassword(
+      email.value, password.value
+    ).then(() => location.href="dashboard.html")
+     .catch(e => alert(e.message));
   }
 </script>
 
