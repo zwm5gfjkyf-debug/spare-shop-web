@@ -118,14 +118,11 @@
 
       snapshot.forEach(doc => {
         const sale = doc.data();
-        const time = sale.createdAt
-          .toDate()
-          .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-        total += sale.price;
-        labels.push(time);
-        data.push(total);
-      });
+       const time = sale.createdAt.toDate().toLocaleTimeString('uz-UZ', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
 
       new Chart(ctx, {
         type: "line",
