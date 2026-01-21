@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
   <meta charset="UTF-8" />
   <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   <style>
-    body {
+    <body>
+  
+
+
+<!-- rest of your content -->
+
+
+<!-- rest of your dashboard content -->{
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f1f5f9;
@@ -28,8 +34,13 @@
       color: white;
     }
 
-    .left { background: #16a34a; }
-    .right { background: #2563eb; }
+    .left {
+      background: #16a34a;
+    }
+
+    .right {
+      background: #2563eb;
+    }
 
     .big h1 {
       margin: 10px 0 0;
@@ -50,6 +61,17 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
     .actions {
       margin-top: 24px;
       display: flex;
@@ -65,112 +87,192 @@
       cursor: pointer;
     }
 
-    .add { background: #16a34a; color: white; }
-    .list { background: #2563eb; color: white; }
-
-    /* Dark mode button */
-    .dark-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      padding: 10px 14px;
-      border-radius: 20px;
-      background: #222;
+    .add {
+      background: #16a34a;
       color: white;
-      cursor: pointer;
-      z-index: 999;
     }
 
-    /* DARK MODE */
-    body.dark {
-      background: #121212;
-      color: #eee;
+    .list {
+      background: #2563eb;
+      color: white;
     }
+    /* Smooth app-like animation */
+.big, .card, button {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
-    body.dark .card {
-      background: #1e1e1e;
-      color: #eee;
-    }
+.big:hover, .card:hover, button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
 
-    body.dark .left { background: #2e7d32; }
-    body.dark .right { background: #1e40af; }
+button:active {
+  transform: scale(0.98);
+}
+    /* Dark mode button */
+.dark-toggle {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: none;
+  background: #222;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 999;
+}
+
+/* DARK MODE */
+body.dark {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark .card {
+  background: #1e1e1e;
+  color: #eee;
+}
+
+body.dark .green-card {
+  background: #2e7d32;
+}
+
+body.dark .blue-card {
+  background: #1e40af;
+}
+
+body.dark button {
+  color: white;
+}
   </style>
 </head>
-
 <body>
 
-<!-- 🌙 DARK MODE BUTTON -->
-<button id="darkToggle" class="dark-toggle">🌙 Dark mode</button>
-
-<!-- TOP -->
-<div class="top">
-  <div class="big left">
-    <div>Bugun sotildi</div>
-    <h1 id="todayCount">Yuklanmoqda…</h1>
+  <!-- TOP -->
+  <div class="top">
+   <div class="big left">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-box-open fa-2x"></i>
+    <div>
+      <div>Bugun sotildi</div>
+   <h1 id="todayCount">Yuklanmoqda…</h1>
+    </div>
   </div>
-
-  <div class="big right">
-    <div>Bugungi tushum</div>
+</div>
+   <div class="big right">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-money-bill-wave fa-2x"></i>
+    <div>
+      <div>Bugungi tushum</div>
     <h1 id="todayTotal">Yuklanmoqda…</h1>
+    </div>
   </div>
 </div>
-
-<!-- MIDDLE -->
-<div class="cards">
-  <div class="card">
-    <h3>Bu hafta</h3>
-    <p id="weekData">—</p>
   </div>
-  <div class="card">
-    <h3>Bu oy</h3>
-    <p id="monthData">—</p>
+
+  <!-- MIDDLE -->
+  <div class="cards">
+    <div class="card">
+     <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
+      <p id="weekData">0 dona / 0 so‘m</p>
+    </div>
+    <div class="card">
+    <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
+      <p id="monthData">0 dona / 0 so‘m</p>
+    </div>
+    <div class="card">
+    <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
+      <p id="topProduct">—</p>
+    </div>
   </div>
-  <div class="card">
-    <h3>Eng ko‘p sotilgan</h3>
-    <p id="topProduct">—</p>
+
+  <!-- BOTTOM -->
+  <div class="actions">
+    <button class="add" onclick="location.href='add.html'">
+      + Mahsulot qo‘shish
+    </button>
+    <button class="list" onclick="location.href='sales.html'">
+      📋 Sotuvlar ro‘yxati
+    </button>
   </div>
-</div>
 
-<!-- BOTTOM -->
-<div class="actions">
-  <button class="add" onclick="location.href='add.html'">+ Mahsulot qo‘shish</button>
-  <button class="list" onclick="location.href='sales.html'">📋 Sotuvlar ro‘yxati</button>
-</div>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain: "spare-shop-web.firebaseapp.com",
+  projectId: "spare-shop-web",
+  storageBucket: "spare-shop-web.firebasestorage.app",
+  messagingSenderId: "960113811021",
+  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
+  measurementId: "G-E762WWCRKB"
+};
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-    authDomain: "spare-shop-web.firebaseapp.com",
-    projectId: "spare-shop-web",
-    storageBucket: "spare-shop-web.firebasestorage.app",
-    messagingSenderId: "960113811021",
-    appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
-  };
+    firebase.initializeApp(firebaseConfig);
 
-  firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      loadDashboard(user.uid);
+    });
+
+    function loadDashboard(uid) {
+      const now = new Date();
+      const today = new Date(now); today.setHours(0,0,0,0);
+      const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
+      const monthStart = new Date(today); monthStart.setDate(1);
+
+      let tC=0, tS=0, wC=0, wS=0, mC=0, mS=0;
+      const productCount = {};
+ db.collection("users").doc(uid).collection("sales").get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            const s = doc.data();
+            if (!s.createdAt) return;
+
+            const d = s.createdAt.toDate();
+            d.setHours(0,0,0,0);
+
+            productCount[s.name] = (productCount[s.name] || 0) + 1;
+
+            if (d.getTime() === today.getTime()) {
+              tC++; tS += s.price;
+            }
+            if (d >= weekStart) {
+              wC++; wS += s.price;
+            }
+            if (d >= monthStart) {
+              mC++; mS += s.price;
+            }
+          });
+
+          todayCount.innerText = tC + " dona";
+          todayTotal.innerText = tS + " so‘m";
+          weekData.innerText = wC + " dona / " + wS + " so‘m";
+          monthData.innerText = mC + " dona / " + mS + " so‘m";
+
+          const top = Object.entries(productCount)
+            .sort((a,b) => b[1]-a[1])[0];
+
+          topProduct.innerText = top
+            ? top[0] + " (" + top[1] + " marta)"
+            : "—";
+        });
+    }
+
 </script>
-
-<!-- 🌙 DARK MODE LOGIC -->
-<script>
-  const toggle = document.getElementById("darkToggle");
-
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
-    toggle.textContent = "☀️ Light mode";
-  }
-
-  toggle.onclick = () => {
-    document.body.classList.toggle("dark");
-    const dark = document.body.classList.contains("dark");
-    localStorage.setItem("theme", dark ? "dark" : "light");
-    toggle.textContent = dark ? "☀️ Light mode" : "🌙 Dark mode";
-  };
-</script>
-
 </body>
 </html>
+ 
