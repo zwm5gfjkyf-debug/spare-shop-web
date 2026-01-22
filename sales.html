@@ -118,10 +118,27 @@
         .orderBy("createdAt")
         .get();
 
-      const labels = [];
-      const data = [];
-      let total = 0;
+    // 1️⃣ Prepare hourly buckets (00–23)
+const hourlyTotals = {};
+for (let h = 0; h < 24; h++) {
+  hourlyTotals[h] = 0;
+}
+      // 2️⃣ Put each sale into its hour
+snapshot.forEach(doc => {
+  const sale = doc.data();
+  if (!sale.createdAt) return;
 
+  const hour = sale.createdAt.toDate().getHours();
+  hourlyTotals[hour] += sale.price; // ⬅ price per hour
+});
+      // 3️⃣ Build chart labels + data (NOT cumulative)
+const labels = [];
+const data = [];
+
+for (let h = 0; h < 24; h++) {
+  labels.push(String(h).padStart(2, "0") + ":00");
+  data.push(hourlyTotals[h]);
+}
       const list = document.getElementById("salesList");
       list.innerHTML = "";
 
@@ -157,34 +174,47 @@
     function drawChart(labels, data) {
       if (chart) chart.destroy();
 
-      chart = new Chart(chartCtx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{
-            data,
-            borderColor: "#4CAF50",
-            backgroundColor: "rgba(76,175,80,0.15)",
-            tension: 0.4,
-            fill: true,
-            pointRadius: 4
-          }]
+     new Chart(ctx, {
+  type: "line",
+  data: {
+    labels,
+    datasets: [{
+      data,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4,
+
+      // 🎨 Dynamic color: green up, red down
+      segment: {
+        borderColor: ctx => {
+          const prev = ctx.p0.parsed.y;
+          const curr = ctx.p1.parsed.y;
+          return curr >= prev ? "#22c55e" : "#ef4444"; // green / red
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: v => v + " so‘m"
-              }
-            }
-          }
+        backgroundColor: ctx => {
+          const prev = ctx.p0.parsed.y;
+          const curr = ctx.p1.parsed.y;
+          return curr >= prev
+            ? "rgba(34,197,94,0.15)"
+            : "rgba(239,68,68,0.15)";
         }
-      });
+      }
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: {
+        ticks: {
+          callback: v => v + " so‘m"
+        }
+      }
     }
+  }
+});
   </script>
 
 </body>
