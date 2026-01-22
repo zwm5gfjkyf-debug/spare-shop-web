@@ -22,9 +22,7 @@
       text-align: center;
     }
 
-    h2 {
-      margin-bottom: 16px;
-    }
+    h2 { margin-bottom: 16px; }
 
     .card {
       background: #fff;
@@ -62,25 +60,24 @@
 
 <body>
 
-  <h2>📊 Bugungi savdo grafigi</h2>
+<h2>📊 Bugungi savdo grafigi</h2>
 
-  <div class="card">
-    <canvas id="dailySalesChart"></canvas>
-  </div>
+<div class="card">
+  <canvas id="dailySalesChart"></canvas>
+</div>
 
-  <h3>📋 Sotuvlar ro‘yxati</h3>
+<h3>📋 Sotuvlar ro‘yxati</h3>
 
-  <div class="card" id="salesList">
-    Yuklanmoqda...
-  </div>
+<div class="card" id="salesList">
+  Yuklanmoqda...
+</div>
 
-  <button class="back" onclick="window.location.href='dashboard.html'">
-    ← Orqaga
-  </button>
+<button class="back" onclick="window.location.href='dashboard.html'">
+  ← Orqaga
+</button>
 
-  <script>
- 
-  const firebaseConfig = {
+<script>
+const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
   projectId: "spare-shop-web",
@@ -90,132 +87,118 @@
   measurementId: "G-E762WWCRKB"
 };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
 
-    const chartCtx = document.getElementById("dailySalesChart").getContext("2d");
-    let chart;
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
+const chartCtx = document
+  .getElementById("dailySalesChart")
+  .getContext("2d");
 
-      loadSales(user.uid);
-    });
+let chart;
 
-    async function loadSales(uid) {
-      const start = new Date();
-      start.setHours(0,0,0,0);
-
-      const snapshot = await db
-        .collection("users")
-        .doc(uid)
-        .collection("sales")
-        .where("createdAt", ">=", start)
-        .orderBy("createdAt")
-        .get();
-
-    // 1️⃣ Prepare hourly buckets (00–23)
-const hourlyTotals = {};
-for (let h = 0; h < 24; h++) {
-  hourlyTotals[h] = 0;
-}
-      // 2️⃣ Put each sale into its hour
-snapshot.forEach(doc => {
-  const sale = doc.data();
-  if (!sale.createdAt) return;
-
-  const hour = sale.createdAt.toDate().getHours();
-  hourlyTotals[hour] += sale.price; // ⬅ price per hour
-});
-      // 3️⃣ Build chart labels + data (NOT cumulative)
-const labels = [];
-const data = [];
-
-for (let h = 0; h < 24; h++) {
-  labels.push(String(h).padStart(2, "0") + ":00");
-  data.push(hourlyTotals[h]);
-}
-      const list = document.getElementById("salesList");
-      list.innerHTML = "";
-
-      if (snapshot.empty) {
-        list.innerHTML = "Bugun sotuv yo‘q";
-      }
-
-      snapshot.forEach(doc => {
-        const sale = doc.data();
-
-        const time = sale.createdAt.toDate().toLocaleTimeString("uz-UZ", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        });
-
-        total += sale.price;
-        labels.push(time);
-        data.push(total);
-
-        const div = document.createElement("div");
-        div.className = "sale";
-        div.innerHTML = `
-          <span>${sale.name}</span>
-          <strong>${sale.price} so‘m</strong>
-        `;
-        list.appendChild(div);
-      });
-
-      drawChart(labels, data);
-    }
-
-    function drawChart(labels, data) {
-      if (chart) chart.destroy();
-
-     new Chart(ctx, {
-  type: "line",
-  data: {
-    labels,
-    datasets: [{
-      data,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 4,
-
-      // 🎨 Dynamic color: green up, red down
-      segment: {
-        borderColor: ctx => {
-          const prev = ctx.p0.parsed.y;
-          const curr = ctx.p1.parsed.y;
-          return curr >= prev ? "#22c55e" : "#ef4444"; // green / red
-        },
-        backgroundColor: ctx => {
-          const prev = ctx.p0.parsed.y;
-          const curr = ctx.p1.parsed.y;
-          return curr >= prev
-            ? "rgba(34,197,94,0.15)"
-            : "rgba(239,68,68,0.15)";
-        }
-      }
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: {
-        ticks: {
-          callback: v => v + " so‘m"
-        }
-      }
-    }
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
   }
+  loadSales(user.uid);
 });
-  </script>
+
+async function loadSales(uid) {
+  const start = new Date();
+  start.setHours(0,0,0,0);
+
+  const snapshot = await db
+    .collection("users")
+    .doc(uid)
+    .collection("sales")
+    .where("createdAt", ">=", start)
+    .orderBy("createdAt")
+    .get();
+
+  // 🔹 Hourly buckets (REAL trading behavior)
+  const hourlyTotals = {};
+  for (let h = 0; h < 24; h++) hourlyTotals[h] = 0;
+
+  snapshot.forEach(doc => {
+    const sale = doc.data();
+    if (!sale.createdAt) return;
+    const hour = sale.createdAt.toDate().getHours();
+    hourlyTotals[hour] += sale.price;
+  });
+
+  // 🔹 Build chart data
+  const labels = [];
+  const data = [];
+
+  for (let h = 0; h < 24; h++) {
+    labels.push(String(h).padStart(2, "0") + ":00");
+    data.push(hourlyTotals[h]);
+  }
+
+  drawChart(labels, data);
+
+  // 🔹 Sales list
+  const list = document.getElementById("salesList");
+  list.innerHTML = "";
+
+  if (snapshot.empty) {
+    list.innerHTML = "Bugun sotuv yo‘q";
+    return;
+  }
+
+  snapshot.forEach(doc => {
+    const sale = doc.data();
+    const div = document.createElement("div");
+    div.className = "sale";
+    div.innerHTML = `
+      <span>${sale.name}</span>
+      <strong>${sale.price} so‘m</strong>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function drawChart(labels, data) {
+  if (chart) chart.destroy();
+
+  chart = new Chart(chartCtx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        segment: {
+          borderColor: ctx =>
+            ctx.p1.parsed.y >= ctx.p0.parsed.y
+              ? "#22c55e"
+              : "#ef4444",
+          backgroundColor: ctx =>
+            ctx.p1.parsed.y >= ctx.p0.parsed.y
+              ? "rgba(34,197,94,0.15)"
+              : "rgba(239,68,68,0.15)"
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => v + " so‘m"
+          }
+        }
+      }
+    }
+  });
+}
+</script>
 
 </body>
 </html>
