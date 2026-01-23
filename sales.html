@@ -139,16 +139,7 @@ const data = [];
   labels.push(time);
   data.push(total);
 });
-  // 🔹 Build chart data
-  const labels = [];
-  const data = [];
 
-  for (let h = 0; h < 24; h++) {
-    labels.push(String(h).padStart(2, "0") + ":00");
-    data.push(hourlyTotals[h]);
-  }
-
-  drawChart(labels, data);
 
   // 🔹 Sales list
   const list = document.getElementById("salesList");
