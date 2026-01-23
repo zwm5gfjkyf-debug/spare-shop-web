@@ -117,18 +117,28 @@ async function loadSales(uid) {
     .where("createdAt", ">=", start)
     .orderBy("createdAt")
     .get();
-
+let total = 0;
+const labels = [];
+const data = [];
   // 🔹 Hourly buckets (REAL trading behavior)
-  const hourlyTotals = {};
-  for (let h = 0; h < 24; h++) hourlyTotals[h] = 0;
 
   snapshot.forEach(doc => {
-    const sale = doc.data();
-    if (!sale.createdAt) return;
-    const hour = sale.createdAt.toDate().getHours();
-    hourlyTotals[hour] += sale.price;
-  });
+   snapshot.forEach(doc => {
+  const sale = doc.data();
+  if (!sale.createdAt) return;
 
+  const time = sale.createdAt
+    .toDate()
+    .toLocaleTimeString("uz-UZ", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+
+  total += sale.price;   // ⬅ cumulative increase
+  labels.push(time);
+  data.push(total);
+});
   // 🔹 Build chart data
   const labels = [];
   const data = [];
@@ -170,24 +180,18 @@ function drawChart(labels, data) {
       labels,
       datasets: [{
         data,
+        borderColor: "#22c55e",
+        backgroundColor: "rgba(34,197,94,0.15)",
         fill: true,
         tension: 0.4,
-        pointRadius: 4,
-        segment: {
-          borderColor: ctx =>
-            ctx.p1.parsed.y >= ctx.p0.parsed.y
-              ? "#22c55e"
-              : "#ef4444",
-          backgroundColor: ctx =>
-            ctx.p1.parsed.y >= ctx.p0.parsed.y
-              ? "rgba(34,197,94,0.15)"
-              : "rgba(239,68,68,0.15)"
-        }
+        pointRadius: 4
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false }
+      },
       scales: {
         y: {
           ticks: {
