@@ -111,37 +111,35 @@ async function loadSales(uid) {
   start.setHours(0,0,0,0);
 
   const snapshot = await db
-    .collection("users")
-    .doc(uid)
     .collection("sales")
+    .where("userId", "==", uid)
     .where("createdAt", ">=", start)
     .orderBy("createdAt")
     .get();
-let total = 0;
-const labels = [];
-const data = [];
-  // 🔹 Hourly buckets (REAL trading behavior)
+
+  let total = 0;
+  const labels = [];
+  const data = [];
 
   snapshot.forEach(doc => {
-   snapshot.forEach(doc => {
-  const sale = doc.data();
-  if (!sale.createdAt) return;
+    const sale = doc.data();
+    if (!sale.createdAt) return;
 
-  const time = sale.createdAt
-    .toDate()
-    .toLocaleTimeString("uz-UZ", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    });
+    const time = sale.createdAt
+      .toDate()
+      .toLocaleTimeString("uz-UZ", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
 
-  total += sale.price;   // ⬅ cumulative increase
-  labels.push(time);
-  data.push(total);
-});
+    total += sale.price;
+    labels.push(time);
+    data.push(total);
+  });
 
+  drawChart(labels, data);
 
-  // 🔹 Sales list
   const list = document.getElementById("salesList");
   list.innerHTML = "";
 
