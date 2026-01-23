@@ -29,13 +29,13 @@
       border-radius: 12px;
       padding: 16px;
       margin: 16px auto;
-      max-width: 600px;
+      max-width: 700px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
     canvas {
       width: 100% !important;
-      height: 280px !important;
+      height: 300px !important;
     }
 
     .sale {
@@ -43,11 +43,12 @@
       justify-content: space-between;
       padding: 10px;
       border-bottom: 1px solid #eee;
+      font-size: 15px;
     }
 
     .back {
       margin-top: 20px;
-      padding: 12px 20px;
+      padding: 12px 22px;
       background: #4a6cf7;
       color: white;
       border: none;
@@ -60,7 +61,7 @@
 
 <body>
 
-<h2>📊 Bugungi savdo grafigi</h2>
+<h2>📈 Bugungi savdo grafigi</h2>
 
 <div class="card">
   <canvas id="dailySalesChart"></canvas>
@@ -77,120 +78,123 @@
 </button>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
-};
+  // 🔥 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+    authDomain: "spare-shop-web.firebaseapp.com",
+    projectId: "spare-shop-web",
+    storageBucket: "spare-shop-web.firebasestorage.app",
+    messagingSenderId: "960113811021",
+    appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
+    measurementId: "G-E762WWCRKB"
+  };
 
-firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-const chartCtx = document
-  .getElementById("dailySalesChart")
-  .getContext("2d");
+  const ctx = document
+    .getElementById("dailySalesChart")
+    .getContext("2d");
 
-let chart;
+  let chart;
 
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-  loadSales(user.uid);
-});
-
-async function loadSales(uid) {
-  const start = new Date();
-  start.setHours(0,0,0,0);
-
-  const snapshot = await db
-    .collection("sales")
-    .where("userId", "==", uid)
-    .where("createdAt", ">=", start)
-    .orderBy("createdAt")
-    .get();
-
-  let total = 0;
-  const labels = [];
-  const data = [];
-
-  snapshot.forEach(doc => {
-    const sale = doc.data();
-    if (!sale.createdAt) return;
-
-    const time = sale.createdAt
-      .toDate()
-      .toLocaleTimeString("uz-UZ", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-
-    total += sale.price;
-    labels.push(time);
-    data.push(total);
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+    loadSales(user.uid);
   });
 
-  drawChart(labels, data);
+  async function loadSales(uid) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
 
-  const list = document.getElementById("salesList");
-  list.innerHTML = "";
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("sales")
+      .where("createdAt", ">=", startOfDay)
+      .orderBy("createdAt")
+      .get();
 
-  if (snapshot.empty) {
-    list.innerHTML = "Bugun sotuv yo‘q";
-    return;
+    let total = 0;
+    const labels = [];
+    const data = [];
+
+    const list = document.getElementById("salesList");
+    list.innerHTML = "";
+
+    if (snapshot.empty) {
+      list.innerHTML = "Bugun sotuv yo‘q";
+      drawChart(labels, data);
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const sale = doc.data();
+      if (!sale.createdAt) return;
+
+      // ⏱ Real sale time
+      const time = sale.createdAt
+        .toDate()
+        .toLocaleTimeString("uz-UZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+
+      // 📈 CUMULATIVE total (never decreases)
+      total += sale.price;
+      labels.push(time);
+      data.push(total);
+
+      // 📋 Sales list
+      const div = document.createElement("div");
+      div.className = "sale";
+      div.innerHTML = `
+        <span>${sale.name}</span>
+        <strong>${sale.price} so‘m</strong>
+      `;
+      list.appendChild(div);
+    });
+
+    drawChart(labels, data);
   }
 
-  snapshot.forEach(doc => {
-    const sale = doc.data();
-    const div = document.createElement("div");
-    div.className = "sale";
-    div.innerHTML = `
-      <span>${sale.name}</span>
-      <strong>${sale.price} so‘m</strong>
-    `;
-    list.appendChild(div);
-  });
-}
+  function drawChart(labels, data) {
+    if (chart) chart.destroy();
 
-function drawChart(labels, data) {
-  if (chart) chart.destroy();
-
-  chart = new Chart(chartCtx, {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        data,
-        borderColor: "#22c55e",
-        backgroundColor: "rgba(34,197,94,0.15)",
-        fill: true,
-        tension: 0.4,
-        pointRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data,
+          borderColor: "#22c55e",                // 🟢 ONLY GREEN
+          backgroundColor: "rgba(34,197,94,0.15)",
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4
+        }]
       },
-      scales: {
-        y: {
-          ticks: {
-            callback: v => v + " so‘m"
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: v => v + " so‘m"
+            }
           }
         }
       }
-    }
-  });
-}
+    });
+  }
 </script>
 
 </body>
