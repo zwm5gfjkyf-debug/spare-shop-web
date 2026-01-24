@@ -111,13 +111,12 @@
     start.setHours(0,0,0,0);
 
     const snapshot = await db
-      .collection("users")
-      .doc(uid)
-      .collection("sales")
-      .where("createdAt", ">=", start)
-      .orderBy("createdAt")
-      .get();
-
+     db.collection("users")
+  .doc(uid)
+  .collection("sales")
+  .where("createdAt", ">=", start)
+  .orderBy("createdAt")
+  .onSnapshot(snapshot => {
     let total = 0;
     const labels = [];
     const data = [];
