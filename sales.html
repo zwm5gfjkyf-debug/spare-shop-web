@@ -35,7 +35,7 @@
 
     canvas {
       width: 100% !important;
-      height: 300px !important;
+      height: 280px !important;
     }
 
     .sale {
@@ -43,12 +43,11 @@
       justify-content: space-between;
       padding: 10px;
       border-bottom: 1px solid #eee;
-      font-size: 15px;
     }
 
     .back {
       margin-top: 20px;
-      padding: 12px 22px;
+      padding: 12px 20px;
       background: #4a6cf7;
       color: white;
       border: none;
@@ -61,7 +60,7 @@
 
 <body>
 
-<h2>📈 Bugungi savdo grafigi</h2>
+<h2>📊 Bugungi savdo grafigi</h2>
 
 <div class="card">
   <canvas id="dailySalesChart"></canvas>
@@ -85,8 +84,7 @@
     projectId: "spare-shop-web",
     storageBucket: "spare-shop-web.firebasestorage.app",
     messagingSenderId: "960113811021",
-    appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-    measurementId: "G-E762WWCRKB"
+    appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -109,70 +107,91 @@
   });
 
   async function loadSales(uid) {
-    const startOfDay = new Date();
-    startOfDay.setHours(0,0,0,0);
+    const start = new Date();
+    start.setHours(0,0,0,0);
 
     const snapshot = await db
       .collection("users")
       .doc(uid)
       .collection("sales")
-      .where("createdAt", ">=", startOfDay)
+      .where("createdAt", ">=", start)
       .orderBy("createdAt")
       .get();
 
-   let total = 0;
-const labels = [];
-const data = [];
+    let total = 0;
+    const labels = [];
+    const data = [];
 
-snapshot.forEach(doc => {
-  const sale = doc.data();
-  if (!sale.createdAt) return;
+    const list = document.getElementById("salesList");
+    list.innerHTML = "";
 
-  const time = sale.createdAt
-    .toDate()
-    .toLocaleTimeString("uz-UZ", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
+    if (snapshot.empty) {
+      list.innerHTML = "Bugun sotuv yo‘q";
+      return;
+    }
+
+    snapshot.forEach(doc => {
+      const sale = doc.data();
+      if (!sale.createdAt) return;
+
+      // 🕒 Time label
+      const time = sale.createdAt
+        .toDate()
+        .toLocaleTimeString("uz-UZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        });
+
+      // 📈 CUMULATIVE (ONLY UP)
+      total += sale.price;
+      labels.push(time);
+      data.push(total);
+
+      // 📋 List
+      const div = document.createElement("div");
+      div.className = "sale";
+      div.innerHTML = `
+        <span>${sale.name}</span>
+        <strong>${sale.price} so‘m</strong>
+      `;
+      list.appendChild(div);
     });
 
-  total += sale.price;   // 🔼 cumulative ONLY UP
-  labels.push(time);
-  data.push(total);
-});
-
-drawChart(labels, data);
+    drawChart(labels, data);
+  }
 
   function drawChart(labels, data) {
     if (chart) chart.destroy();
 
-   chart = new Chart(chartCtx, {
-  type: "line",
-  data: {
-    labels,
-    datasets: [{
-      data,
-      borderColor: "#22c55e",          // 🟢 green
-      backgroundColor: "rgba(34,197,94,0.15)",
-      fill: true,
-      tension: 0.4,
-      pointRadius: 4
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
-      y: {
-        ticks: {
-          callback: v => v + " so‘m"
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data,
+          borderColor: "#22c55e",                 // 🟢 GREEN ONLY
+          backgroundColor: "rgba(34,197,94,0.18)",
+          fill: true,
+          tension: 0.45,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: v => v + " so‘m"
+            }
+          }
         }
       }
-    }
+    });
   }
-});
 </script>
 
 </body>
