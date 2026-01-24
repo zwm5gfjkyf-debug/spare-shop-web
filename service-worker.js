@@ -10,7 +10,8 @@ const FILES_TO_CACHE = [
   "/icon-192x192.png",
   "/icon-512x512.png"
 ];
-
+// self.addEventListener("install", () => {});
+// self.addEventListener("fetch", () => {});
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
