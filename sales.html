@@ -22,7 +22,17 @@
       text-align: center;
     }
 
-    h2 { margin-bottom: 16px; }
+    h2 { margin-bottom: 10px; }
+
+    .switch-buttons button {
+      padding: 8px 14px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      background: #4a6cf7;
+      color: white;
+      cursor: pointer;
+    }
 
     .card {
       background: #fff;
@@ -35,7 +45,7 @@
 
     canvas {
       width: 100% !important;
-      height: 280px !important;
+      height: 300px !important;
     }
 
     .sale {
@@ -60,22 +70,20 @@
 
 <body>
 
-<h2>📊 Bugungi savdo grafigi</h2>
-<div class="card">
-  <canvas id="dailySalesChart"></canvas>
+<h2 id="chartTitle">📊 Bugungi savdo grafigi</h2>
+
+<div class="switch-buttons">
+  <button onclick="showToday()">Bugun</button>
+  <button onclick="showWeek()">Bu hafta</button>
+  <button onclick="showMonth()">Bu oy</button>
 </div>
 
-<h2>📅 Haftalik savdo grafigi</h2>
 <div class="card">
-  <canvas id="weeklySalesChart"></canvas>
-</div>
-
-<h2>🗓 Oylik savdo grafigi</h2>
-<div class="card">
-  <canvas id="monthlySalesChart"></canvas>
+  <canvas id="mainChart"></canvas>
 </div>
 
 <h3>📋 Sotuvlar ro‘yxati</h3>
+
 <div class="card" id="salesList">
   Yuklanmoqda...
 </div>
@@ -89,9 +97,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
   projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -99,114 +104,60 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let dailyChart, weeklyChart, monthlyChart;
+let chart;
+let allSales = [];
 
 auth.onAuthStateChanged(user => {
   if (!user) {
     window.location.href = "index.html";
     return;
   }
-  loadSales(user.uid);
-});
-
-function loadSales(uid) {
-  const todayStart = new Date();
-  todayStart.setHours(0,0,0,0);
 
   db.collection("users")
-    .doc(uid)
+    .doc(user.uid)
     .collection("sales")
     .orderBy("createdAt")
     .onSnapshot(snapshot => {
 
-      const list = document.getElementById("salesList");
-      list.innerHTML = "";
-
-      let dailyTotal = 0;
-      let dailyLabels = [];
-      let dailyData = [];
-
-      let weeklyTotals = [0,0,0,0,0,0,0];
-      let monthlyTotals;
-
-      const now = new Date();
-      const weekStart = new Date();
-      weekStart.setDate(now.getDate() - 6);
-      weekStart.setHours(0,0,0,0);
-
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-      monthlyTotals = new Array(daysInMonth).fill(0);
-
+      allSales = [];
       snapshot.forEach(doc => {
-        const sale = doc.data();
-        if (!sale.createdAt) return;
-
-        const saleDate = sale.createdAt.toDate();
-
-        // ===== DAILY =====
-        if (saleDate >= todayStart) {
-          const time = saleDate.toLocaleTimeString("uz-UZ", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false
-          });
-
-          dailyTotal += sale.price;
-          dailyLabels.push(time);
-          dailyData.push(dailyTotal);
+        const data = doc.data();
+        if (data.createdAt) {
+          allSales.push(data);
         }
-
-        // ===== WEEKLY =====
-        const diff = Math.floor((saleDate - weekStart) / (1000*60*60*24));
-        if (diff >= 0 && diff < 7) {
-          weeklyTotals[diff] += sale.price;
-        }
-
-        // ===== MONTHLY =====
-        if (
-          saleDate.getMonth() === now.getMonth() &&
-          saleDate.getFullYear() === now.getFullYear()
-        ) {
-          monthlyTotals[saleDate.getDate() - 1] += sale.price;
-        }
-
-        // ===== LIST =====
-        const div = document.createElement("div");
-        div.className = "sale";
-        div.innerHTML = `
-          <span>${sale.name}</span>
-          <strong>${sale.price} so‘m</strong>
-        `;
-        list.appendChild(div);
       });
 
-      if (snapshot.empty) {
-        list.innerHTML = "Sotuv mavjud emas";
-      }
-
-      // Make weekly cumulative
-      for (let i = 1; i < weeklyTotals.length; i++) {
-        weeklyTotals[i] += weeklyTotals[i-1];
-      }
-
-      // Make monthly cumulative
-      for (let i = 1; i < monthlyTotals.length; i++) {
-        monthlyTotals[i] += monthlyTotals[i-1];
-      }
-
-      drawChart("dailySalesChart", dailyLabels, dailyData, dailyChart, c => dailyChart = c);
-      drawChart("weeklySalesChart", ["1","2","3","4","5","6","7"], weeklyTotals, weeklyChart, c => weeklyChart = c);
-      drawChart("monthlySalesChart", Array.from({length: daysInMonth}, (_,i)=>i+1), monthlyTotals, monthlyChart, c => monthlyChart = c);
+      showToday();
+      updateList();
     });
+});
+
+function updateList() {
+  const list = document.getElementById("salesList");
+  list.innerHTML = "";
+
+  if (allSales.length === 0) {
+    list.innerHTML = "Sotuv yo‘q";
+    return;
+  }
+
+  allSales.slice().reverse().forEach(sale => {
+    const div = document.createElement("div");
+    div.className = "sale";
+    div.innerHTML = `
+      <span>${sale.name}</span>
+      <strong>${sale.price} so‘m</strong>
+    `;
+    list.appendChild(div);
+  });
 }
 
-function drawChart(canvasId, labels, data, existingChart, setChart) {
-  const ctx = document.getElementById(canvasId).getContext("2d");
+function drawChart(labels, data) {
+  const ctx = document.getElementById("mainChart").getContext("2d");
 
-  if (existingChart) existingChart.destroy();
+  if (chart) chart.destroy();
 
-  const newChart = new Chart(ctx, {
+  chart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
@@ -231,8 +182,77 @@ function drawChart(canvasId, labels, data, existingChart, setChart) {
       }
     }
   });
+}
 
-  setChart(newChart);
+function showToday() {
+  document.getElementById("chartTitle").innerText = "📊 Bugungi savdo grafigi";
+
+  const start = new Date();
+  start.setHours(0,0,0,0);
+
+  let total = 0;
+  const labels = [];
+  const data = [];
+
+  allSales.forEach(sale => {
+    const date = sale.createdAt.toDate();
+    if (date >= start) {
+      total += sale.price;
+      labels.push(date.toLocaleTimeString("uz-UZ", {hour:'2-digit', minute:'2-digit', hour12:false}));
+      data.push(total);
+    }
+  });
+
+  drawChart(labels, data);
+}
+
+function showWeek() {
+  document.getElementById("chartTitle").innerText = "📊 Haftalik savdo grafigi";
+
+  const start = new Date();
+  start.setDate(start.getDate() - 6);
+  start.setHours(0,0,0,0);
+
+  let totals = new Array(7).fill(0);
+
+  allSales.forEach(sale => {
+    const date = sale.createdAt.toDate();
+    const diff = Math.floor((date - start)/(1000*60*60*24));
+    if (diff >= 0 && diff < 7) {
+      totals[diff] += sale.price;
+    }
+  });
+
+  for (let i=1;i<7;i++) {
+    totals[i] += totals[i-1];
+  }
+
+  drawChart(["1","2","3","4","5","6","7"], totals);
+}
+
+function showMonth() {
+  document.getElementById("chartTitle").innerText = "📊 Oylik savdo grafigi";
+
+  const now = new Date();
+  const days = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+
+  let totals = new Array(days).fill(0);
+
+  allSales.forEach(sale => {
+    const date = sale.createdAt.toDate();
+    if (date.getMonth() === now.getMonth()) {
+      totals[date.getDate()-1] += sale.price;
+    }
+  });
+
+  for (let i=1;i<days;i++) {
+    totals[i] += totals[i-1];
+  }
+
+  drawChart(
+    Array.from({length: days}, (_,i)=>i+1),
+    totals
+  );
 }
 </script>
 
