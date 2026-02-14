@@ -1,279 +1,142 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
-  <meta charset="UTF-8" />
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <style>
-    <body>
-  
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-
-<!-- rest of your content -->
-
-
-<!-- rest of your dashboard content -->{
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      padding: 16px;
-    }
-
-    .top {
-      display: flex;
-      gap: 12px;
-    }
-
-    .big {
-      flex: 1;
-      padding: 20px;
-      border-radius: 16px;
-      color: white;
-    }
-
-    .left {
-      background: #16a34a;
-    }
-
-    .right {
-      background: #2563eb;
-    }
-
-    .big h1 {
-      margin: 10px 0 0;
-      font-size: 28px;
-    }
-
-    .cards {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .card {
-      background: white;
-      padding: 16px;
-      border-radius: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 16px;
-    }
-
-    .card p {
-      margin: 0;
-      font-size: 15px;
-      font-weight: bold;
-    }
-
-    .actions {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    button {
-      padding: 16px;
-      font-size: 18px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-    }
-
-    .add {
-      background: #16a34a;
-      color: white;
-    }
-
-    .list {
-      background: #2563eb;
-      color: white;
-    }
-    /* Smooth app-like animation */
-.big, .card, button {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+  text-align: center;
 }
 
-.big:hover, .card:hover, button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+.top {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
 }
 
-button:active {
-  transform: scale(0.98);
+.big {
+  flex: 1;
+  padding: 30px;
+  border-radius: 16px;
+  color: white;
 }
-    /* Dark mode button */
-.dark-toggle {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  padding: 10px 14px;
-  border-radius: 20px;
+
+.left {
+  background: #16a34a;
+}
+
+.right {
+  background: #2563eb;
+}
+
+.big h1 {
+  margin-top: 15px;
+  font-size: 32px;
+}
+
+.center-btn {
+  margin-top: 60px;
+}
+
+.center-btn button {
+  padding: 20px 40px;
+  font-size: 22px;
   border: none;
-  background: #222;
+  border-radius: 16px;
+  background: #111827;
   color: white;
   cursor: pointer;
-  font-size: 14px;
-  z-index: 999;
+  transition: 0.2s;
 }
 
-/* DARK MODE */
-body.dark {
-  background: #121212;
-  color: #eee;
+.center-btn button:hover {
+  transform: scale(1.05);
+  background: #000;
 }
-
-body.dark .card {
-  background: #1e1e1e;
-  color: #eee;
-}
-
-body.dark .green-card {
-  background: #2e7d32;
-}
-
-body.dark .blue-card {
-  background: #1e40af;
-}
-
-body.dark button {
-  color: white;
-}
-  </style>
+</style>
 </head>
+
 <body>
 
-  <!-- TOP -->
-  <div class="top">
-   <div class="big left">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <i class="fa-solid fa-box-open fa-2x"></i>
-    <div>
-      <div>Bugun sotildi</div>
-   <h1 id="todayCount">Yuklanmoqda…</h1>
-    </div>
+<div class="top">
+  <div class="big left">
+    <div>Bugun sotildi</div>
+    <h1 id="todayCount">Yuklanmoqda...</h1>
+  </div>
+
+  <div class="big right">
+    <div>Bugungi tushum</div>
+    <h1 id="todayTotal">Yuklanmoqda...</h1>
   </div>
 </div>
-   <div class="big right">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <i class="fa-solid fa-money-bill-wave fa-2x"></i>
-    <div>
-      <div>Bugungi tushum</div>
-    <h1 id="todayTotal">Yuklanmoqda…</h1>
-    </div>
-  </div>
+
+<div class="center-btn">
+  <button onclick="location.href='sales.html'">
+    📊 Batafsil statistika
+  </button>
 </div>
-  </div>
 
-  <!-- MIDDLE -->
-  <div class="cards">
-    <div class="card">
-     <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
-      <p id="weekData">0 dona / 0 so‘m</p>
-    </div>
-    <div class="card">
-    <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
-      <p id="monthData">0 dona / 0 so‘m</p>
-    </div>
-    <div class="card">
-    <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
-      <p id="topProduct">—</p>
-    </div>
-  </div>
+<script>
 
-  <!-- BOTTOM -->
-  <div class="actions">
-    <button class="add" onclick="location.href='add.html'">
-      + Mahsulot qo‘shish
-    </button>
-    <button class="list" onclick="location.href='sales.html'">
-      📋 Sotuvlar ro‘yxati
-    </button>
-  </div>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <script>
 const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
   projectId: "spare-shop-web",
   storageBucket: "spare-shop-web.firebasestorage.app",
   messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
+  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  loadToday(user.uid);
+});
 
-      loadDashboard(user.uid);
+function loadToday(uid) {
+  const start = new Date();
+  start.setHours(0,0,0,0);
+
+  db.collection("users")
+    .doc(uid)
+    .collection("sales")
+    .where("createdAt", ">=", start)
+    .get()
+    .then(snapshot => {
+
+      let count = 0;
+      let total = 0;
+
+      snapshot.forEach(doc => {
+        const sale = doc.data();
+        count++;
+        total += sale.price;
+      });
+
+      document.getElementById("todayCount").innerText = count + " dona";
+      document.getElementById("todayTotal").innerText = total + " so‘m";
     });
-
-    function loadDashboard(uid) {
-      const now = new Date();
-      const today = new Date(now); today.setHours(0,0,0,0);
-      const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
-      const monthStart = new Date(today); monthStart.setDate(1);
-
-      let tC=0, tS=0, wC=0, wS=0, mC=0, mS=0;
-      const productCount = {};
- db.collection("users").doc(uid).collection("sales").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const s = doc.data();
-            if (!s.createdAt) return;
-
-            const d = s.createdAt.toDate();
-            d.setHours(0,0,0,0);
-
-            productCount[s.name] = (productCount[s.name] || 0) + 1;
-
-            if (d.getTime() === today.getTime()) {
-              tC++; tS += s.price;
-            }
-            if (d >= weekStart) {
-              wC++; wS += s.price;
-            }
-            if (d >= monthStart) {
-              mC++; mS += s.price;
-            }
-          });
-
-          todayCount.innerText = tC + " dona";
-          todayTotal.innerText = tS + " so‘m";
-          weekData.innerText = wC + " dona / " + wS + " so‘m";
-          monthData.innerText = mC + " dona / " + mS + " so‘m";
-
-          const top = Object.entries(productCount)
-            .sort((a,b) => b[1]-a[1])[0];
-
-          topProduct.innerText = top
-            ? top[0] + " (" + top[1] + " marta)"
-            : "—";
-        });
-    }
+}
 
 </script>
 
 </body>
 </html>
- 
