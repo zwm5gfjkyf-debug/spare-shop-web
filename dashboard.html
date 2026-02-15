@@ -2,245 +2,204 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard</title>
+  <title>Spare Shop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#16a34a">
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      padding: 20px;
+      padding-bottom: 100px; /* space for bottom nav */
+      min-height: 100vh;
+      animation: fadeIn 0.3s ease-in-out;
+    }
 
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    padding: 20px;
-    color: white;
-    min-height: 100vh;
-  }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-  /* ===== HEADER STYLE ===== */
-  .top {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 25px;
-  }
+    .header {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
 
-  .big {
-    flex: 1;
-    padding: 25px;
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    background: rgba(255,255,255,0.08);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    transition: 0.3s ease;
-  }
+    .top {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
 
-  .big:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-  }
+    .big {
+      flex: 1;
+      min-width: 260px;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: 0.2s;
+    }
 
-  .big h1 {
-    font-size: 36px;
-    margin-top: 10px;
-    font-weight: 700;
-  }
+    .big:hover {
+      transform: translateY(-3px);
+    }
 
-  .big small {
-    opacity: 0.8;
-  }
+    .big h1 {
+      margin: 10px 0 0;
+      font-size: 32px;
+    }
 
-  .left {
-    border-left: 5px solid #22c55e;
-  }
+    .cards {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
 
-  .right {
-    border-left: 5px solid #3b82f6;
-  }
+    .card {
+      background: rgba(255,255,255,0.07);
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
 
-  /* ===== SMALL CARDS ===== */
-  .cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 25px;
-  }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      opacity: 0.8;
+    }
 
-  .card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    transition: 0.3s;
-  }
+    .card p {
+      margin: 0;
+      font-weight: bold;
+      font-size: 16px;
+    }
 
-  .card:hover {
-    transform: translateY(-3px);
-  }
+    .actions {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
 
-  .card h3 {
-    font-size: 14px;
-    opacity: 0.8;
-    margin-bottom: 8px;
-  }
+    .btn {
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-  .card p {
-    font-size: 18px;
-    font-weight: bold;
-  }
+    .btn-green {
+      background: linear-gradient(90deg,#22c55e,#16a34a);
+      color: white;
+    }
 
-  /* ===== ACTION BUTTONS ===== */
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
+    .btn-blue {
+      background: linear-gradient(90deg,#3b82f6,#2563eb);
+      color: white;
+    }
 
-  button {
-    padding: 18px;
-    border-radius: 14px;
-    border: none;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
-  }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
 
-  .add {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: white;
-  }
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: #0f172a;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
 
-  .list {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-  }
+    .bottom-nav div {
+      flex: 1;
+      text-align: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-  button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  /* ===== BOTTOM NAV ===== */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 65px;
-    background: rgba(15,23,42,0.9);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    font-size: 22px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .bottom-nav div {
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .bottom-nav div:hover {
-    transform: scale(1.1);
-  }
-
-  /* Fade animation */
-  body {
-    animation: fadeIn 0.4s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
+    .bottom-nav div:active {
+      transform: scale(0.85);
+    }
+  </style>
 </head>
 
 <body>
 
-  <div class="app-header">
-    Spare Shop
+<div class="header">Spare Shop</div>
+
+<div class="top">
+  <div class="big">
+    <div><i class="fa-solid fa-box-open"></i> Bugun sotildi</div>
+    <h1 id="todayCount">...</h1>
   </div>
 
-  <!-- TOP -->
-  <div class="top">
-    <div class="big left">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-box-open fa-2x"></i>
-        <div>
-          <div>Bugun sotildi</div>
-          <h1 id="todayCount">Yuklanmoqda...</h1>
-        </div>
-      </div>
-    </div>
+  <div class="big">
+    <div><i class="fa-solid fa-money-bill-wave"></i> Bugungi tushum</div>
+    <h1 id="todayTotal">...</h1>
+  </div>
+</div>
 
-    <div class="big right">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-money-bill-wave fa-2x"></i>
-        <div>
-          <div>Bugungi tushum</div>
-          <h1 id="todayTotal">Yuklanmoqda...</h1>
-        </div>
-      </div>
-    </div>
+<div class="cards">
+  <div class="card">
+    <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
+    <p id="weekData">...</p>
   </div>
 
-  <!-- MIDDLE -->
-  <div class="cards">
-    <div class="card">
-      <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
-      <p id="weekData">0 dona / 0 so‘m</p>
-    </div>
-
-    <div class="card">
-      <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
-      <p id="monthData">0 dona / 0 so‘m</p>
-    </div>
-
-    <div class="card">
-      <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
-      <p id="topProduct">—</p>
-    </div>
+  <div class="card">
+    <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
+    <p id="monthData">...</p>
   </div>
 
-  <!-- BUTTONS -->
-  <div class="actions">
-    <button class="add" onclick="location.href='add.html'">
-      + Mahsulot qo‘shish
-    </button>
-
-    <button class="list" onclick="location.href='sales.html'">
-      📋 Sotuvlar ro‘yxati
-    </button>
+  <div class="card">
+    <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
+    <p id="topProduct">...</p>
   </div>
+</div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div onclick="location.href='dashboard.html'">🏠</div>
-    <div onclick="location.href='add.html'">➕</div>
-    <div onclick="location.href='sales.html'">📊</div>
-  </div>
+<div class="actions">
+  <button class="btn btn-green" onclick="location.href='add.html'">
+    + Mahsulot qo‘shish
+  </button>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <button class="btn btn-blue" onclick="location.href='sales.html'">
+    📊 Sotuvlar ro‘yxati
+  </button>
+</div>
 
- <script>
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <div onclick="location.href='dashboard.html'">🏠</div>
+  <div onclick="location.href='add.html'">➕</div>
+  <div onclick="location.href='sales.html'">📊</div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
@@ -250,57 +209,61 @@ const firebaseConfig = {
   appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    window.addEventListener("load", () => {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          window.location.href = "index.html";
-          return;
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  loadDashboard(user.uid);
+});
+
+function loadDashboard(uid) {
+  const now = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
+  const monthStart = new Date(today); monthStart.setDate(1);
+
+  let tC=0, tS=0, wC=0, wS=0, mC=0, mS=0;
+  const productCount = {};
+
+  db.collection("users").doc(uid).collection("sales").get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const s = doc.data();
+        if (!s.createdAt) return;
+
+        const d = s.createdAt.toDate();
+        d.setHours(0,0,0,0);
+
+        productCount[s.name] = (productCount[s.name] || 0) + 1;
+
+        if (d.getTime() === today.getTime()) {
+          tC++; tS += s.price;
         }
-        loadDashboard(user.uid);
+        if (d >= weekStart) {
+          wC++; wS += s.price;
+        }
+        if (d >= monthStart) {
+          mC++; mS += s.price;
+        }
       });
+
+      document.getElementById("todayCount").innerText = tC + " dona";
+      document.getElementById("todayTotal").innerText = tS + " so‘m";
+      document.getElementById("weekData").innerText = wC + " dona / " + wS + " so‘m";
+      document.getElementById("monthData").innerText = mC + " dona / " + mS + " so‘m";
+
+      const top = Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
+      document.getElementById("topProduct").innerText =
+        top ? top[0] + " (" + top[1] + " marta)" : "—";
     });
-
-    function loadDashboard(uid) {
-      const now = new Date();
-      const today = new Date(now); today.setHours(0,0,0,0);
-      const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
-      const monthStart = new Date(today); monthStart.setDate(1);
-
-      let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
-      const productCount = {};
-
-      db.collection("users").doc(uid).collection("sales").get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const s = doc.data();
-            if (!s.createdAt) return;
-
-            const d = s.createdAt.toDate();
-            const price = Number(s.price) || 0;
-
-            productCount[s.name] = (productCount[s.name] || 0) + 1;
-
-            if (d >= today) { tC++; tS += price; }
-            if (d >= weekStart) { wC++; wS += price; }
-            if (d >= monthStart) { mC++; mS += price; }
-          });
-
-          document.getElementById("todayCount").innerText = tC + " dona";
-          document.getElementById("todayTotal").innerText = tS + " so‘m";
-          document.getElementById("weekData").innerText = wC + " dona / " + wS + " so‘m";
-          document.getElementById("monthData").innerText = mC + " dona / " + mS + " so‘m";
-
-          const top = Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
-          document.getElementById("topProduct").innerText =
-            top ? top[0] + " (" + top[1] + " marta)" : "—";
-        });
-    }
-  </script>
+}
+</script>
 
 </body>
 </html>
