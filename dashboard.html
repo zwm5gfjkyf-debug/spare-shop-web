@@ -6,12 +6,34 @@
   <meta charset="UTF-8" />
   <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta name="theme-color" content="#16a34a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
   <style>
     <body>
-  
+  <div class="app-header">
+  <h2>Spare Shop</h2>
+</div>
 
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #16a34a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 1000;
+}
 
+body {
+  padding-bottom: 80px;
+}
 <!-- rest of your content -->
 
 
@@ -273,7 +295,43 @@ const firebaseConfig = {
     }
 
 </script>
+<div class="bottom-nav">
+  <div onclick="location.href='dashboard.html'">🏠</div>
+  <div onclick="location.href='add.html'">➕</div>
+  <div onclick="location.href='sales.html'">📊</div>
+</div>
+  .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+  font-size: 22px;
+}
 
+.bottom-nav div {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.bottom-nav div:active {
+  transform: scale(0.9);
+}
+  body {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </body>
 </html>
  
