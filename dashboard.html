@@ -10,135 +10,164 @@
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      padding: 80px 16px 90px 16px;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    padding: 20px;
+    color: white;
+    min-height: 100vh;
+  }
 
-    /* HEADER */
-    .app-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: #16a34a;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 18px;
-      z-index: 1000;
-    }
+  /* ===== HEADER STYLE ===== */
+  .top {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 25px;
+  }
 
-    /* TOP CARDS */
-    .top {
-      display: flex;
-      gap: 12px;
-    }
+  .big {
+    flex: 1;
+    padding: 25px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    transition: 0.3s ease;
+  }
 
-    .big {
-      flex: 1;
-      padding: 20px;
-      border-radius: 16px;
-      color: white;
-    }
+  .big:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  }
 
-    .left { background: #16a34a; }
-    .right { background: #2563eb; }
+  .big h1 {
+    font-size: 36px;
+    margin-top: 10px;
+    font-weight: 700;
+  }
 
-    .big h1 {
-      margin: 10px 0 0;
-      font-size: 26px;
-    }
+  .big small {
+    opacity: 0.8;
+  }
 
-    /* SMALL CARDS */
-    .cards {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+  .left {
+    border-left: 5px solid #22c55e;
+  }
 
-    .card {
-      background: white;
-      padding: 16px;
-      border-radius: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
+  .right {
+    border-left: 5px solid #3b82f6;
+  }
 
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 15px;
-    }
+  /* ===== SMALL CARDS ===== */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 25px;
+  }
 
-    .card p {
-      margin: 0;
-      font-size: 14px;
-      font-weight: bold;
-    }
+  .card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    transition: 0.3s;
+  }
 
-    /* ACTION BUTTONS */
-    .actions {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+  .card:hover {
+    transform: translateY(-3px);
+  }
 
-    button {
-      padding: 16px;
-      font-size: 18px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-    }
+  .card h3 {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
 
-    .add {
-      background: #16a34a;
-      color: white;
-    }
+  .card p {
+    font-size: 18px;
+    font-weight: bold;
+  }
 
-    .list {
-      background: #2563eb;
-      color: white;
-    }
+  /* ===== ACTION BUTTONS ===== */
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
 
-    button:active {
-      transform: scale(0.97);
-    }
+  button {
+    padding: 18px;
+    border-radius: 14px;
+    border: none;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
 
-    /* BOTTOM NAV */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
-      font-size: 22px;
-    }
+  .add {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+  }
 
-    .bottom-nav div {
-      flex: 1;
-      text-align: center;
-      cursor: pointer;
-    }
-  </style>
+  .list {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: rgba(15,23,42,0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 22px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .bottom-nav div {
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .bottom-nav div:hover {
+    transform: scale(1.1);
+  }
+
+  /* Fade animation */
+  body {
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
 </head>
 
 <body>
