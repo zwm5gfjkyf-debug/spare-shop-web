@@ -141,6 +141,26 @@
     .bottom-nav div:active {
       transform: scale(0.85);
     }
+    .analytics-btn {
+  padding: 18px;
+  font-size: 20px;
+  border: none;
+  border-radius: 18px;
+  cursor: pointer;
+  font-weight: 600;
+  background: linear-gradient(90deg,#06b6d4,#3b82f6);
+  color: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transition: 0.2s;
+}
+
+.analytics-btn:hover {
+  transform: translateY(-3px);
+}
+
+.analytics-btn:active {
+  transform: scale(0.97);
+}
   </style>
 </head>
 
@@ -178,17 +198,20 @@
 </div>
 
 <div class="actions">
-  <button class="btn btn-green" onclick="location.href='add.html'">
+
+  <button class="add" onclick="location.href='add.html'">
     + Mahsulot qo‘shish
   </button>
-<button onclick="location.href='analytics.html'">
-📈 Analytics
-</button>
-  <button class="btn btn-blue" onclick="location.href='sales.html'">
-    📊 Sotuvlar ro‘yxati
-  </button>
-</div>
 
+  <button class="analytics-btn" onclick="location.href='analytics.html'">
+    📊 Tahlil (Analytics)
+  </button>
+
+  <button class="list" onclick="location.href='sales.html'">
+    📋 Sotuvlar ro‘yxati
+  </button>
+
+</div>
 <!-- Bottom Navigation -->
 <div class="bottom-nav">
   <div onclick="location.href='dashboard.html'">🏠</div>
