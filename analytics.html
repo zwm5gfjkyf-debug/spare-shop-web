@@ -1,1 +1,213 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Analytics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  padding:20px;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.stat{
+  font-size:18px;
+  margin:8px 0;
+}
+
+canvas{
+  width:100% !important;
+  height:320px !important;
+}
+
+.back{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+  font-weight:600;
+  font-size:16px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>📈 Analytics</h2>
+
+<div class="card">
+  <canvas id="growthChart"></canvas>
+</div>
+
+<div class="card">
+  <div class="stat">🕒 Best hour: <strong id="bestHour">—</strong></div>
+  <div class="stat">📅 Best day: <strong id="bestDay">—</strong></div>
+  <div class="stat">💎 Top product: <strong id="topProduct">—</strong></div>
+  <div class="stat">📈 Growth: <strong id="growthPercent">—</strong></div>
+</div>
+
+<button class="back" onclick="location.href='dashboard.html'">
+← Orqaga
+</button>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let chart;
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    window.location.href="index.html";
+    return;
+  }
+  loadAnalytics(user.uid);
+});
+
+function loadAnalytics(uid){
+
+db.collection("users")
+.doc(uid)
+.collection("sales")
+.orderBy("createdAt")
+.get()
+.then(snapshot=>{
+
+let hourly = new Array(24).fill(0);
+let daily = {};
+let productCount = {};
+let totals = [];
+
+snapshot.forEach(doc=>{
+  const s = doc.data();
+  if(!s.createdAt) return;
+
+  const d = s.createdAt.toDate();
+  hourly[d.getHours()] += s.price;
+
+  const day = d.toLocaleDateString();
+  daily[day] = (daily[day]||0) + s.price;
+
+  productCount[s.name] = (productCount[s.name]||0)+1;
+
+  totals.push(s.price);
+});
+
+/* BEST HOUR */
+let bestHourIndex = hourly.indexOf(Math.max(...hourly));
+document.getElementById("bestHour").innerText =
+bestHourIndex + ":00";
+
+/* BEST DAY */
+let bestDay = Object.entries(daily)
+.sort((a,b)=>b[1]-a[1])[0];
+
+document.getElementById("bestDay").innerText =
+bestDay ? bestDay[0] : "—";
+
+/* TOP PRODUCT */
+let topProduct = Object.entries(productCount)
+.sort((a,b)=>b[1]-a[1])[0];
+
+document.getElementById("topProduct").innerText =
+topProduct ? topProduct[0] : "—";
+
+/* GROWTH */
+let first = totals[0] || 0;
+let last = totals[totals.length-1] || 0;
+
+let growth = first
+? (((last-first)/first)*100).toFixed(1)
+: 0;
+
+document.getElementById("growthPercent").innerText =
+growth + "%";
+
+/* CHART */
+let cumulative=[];
+let sum=0;
+
+snapshot.forEach(doc=>{
+  const s=doc.data();
+  if(!s.createdAt) return;
+  sum+=s.price;
+  cumulative.push(sum);
+});
+
+let labels = cumulative.map((_,i)=>i+1);
+
+drawChart(labels,cumulative);
+
+});
+}
+
+function drawChart(labels,data){
+const ctx=document.getElementById("growthChart").getContext("2d");
+if(chart) chart.destroy();
+
+chart=new Chart(ctx,{
+  type:"line",
+  data:{
+    labels,
+    datasets:[{
+      data,
+      borderColor:"#22c55e",
+      backgroundColor:"rgba(34,197,94,0.2)",
+      fill:true,
+      tension:0.4
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      y:{
+        ticks:{
+          callback:v=>v+" so‘m"
+        }
+      }
+    }
+  }
+});
+}
+</script>
+
+</body>
+</html>
