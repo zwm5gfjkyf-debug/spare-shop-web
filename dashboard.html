@@ -1,167 +1,155 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <title>Spare Shop</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#16a34a">
+<meta charset="UTF-8" />
+<title>Spare Shop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#16a34a">
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      padding: 20px;
-      padding-bottom: 100px; /* space for bottom nav */
-      min-height: 100vh;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+<style>
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .top {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .big {
-      flex: 1;
-      min-width: 260px;
-      padding: 20px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      transition: 0.2s;
-    }
-
-    .big:hover {
-      transform: translateY(-3px);
-    }
-
-    .big h1 {
-      margin: 10px 0 0;
-      font-size: 32px;
-    }
-
-    .cards {
-      margin-top: 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.07);
-      padding: 18px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    }
-
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 15px;
-      opacity: 0.8;
-    }
-
-    .card p {
-      margin: 0;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .actions {
-      margin-top: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .btn {
-      padding: 16px;
-      border-radius: 14px;
-      border: none;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .btn-green {
-      background: linear-gradient(90deg,#22c55e,#16a34a);
-      color: white;
-    }
-
-    .btn-blue {
-      background: linear-gradient(90deg,#3b82f6,#2563eb);
-      color: white;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 65px;
-      background: #0f172a;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .bottom-nav div {
-      flex: 1;
-      text-align: center;
-      font-size: 22px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .bottom-nav div:active {
-      transform: scale(0.85);
-    }
-    .analytics-btn {
-  padding: 18px;
-  font-size: 20px;
-  border: none;
-  border-radius: 18px;
-  cursor: pointer;
-  font-weight: 600;
-  background: linear-gradient(90deg,#06b6d4,#3b82f6);
-  color: white;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  transition: 0.2s;
+body{
+  margin:0;
+  font-family:'Segoe UI', Arial, sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  padding:20px;
+  padding-bottom:110px;
+  min-height:100vh;
 }
 
-.analytics-btn:hover {
-  transform: translateY(-3px);
+/* HEADER */
+.header{
+  font-size:22px;
+  font-weight:600;
+  margin-bottom:25px;
 }
 
-.analytics-btn:active {
-  transform: scale(0.97);
+/* TOP CARDS */
+.top{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
 }
-  </style>
+
+.big{
+  flex:1;
+  min-width:260px;
+  padding:22px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  transition:0.2s;
+}
+
+.big:hover{
+  transform:translateY(-4px);
+}
+
+.big h1{
+  margin:12px 0 0;
+  font-size:34px;
+}
+
+/* SMALL CARDS */
+.cards{
+  margin-top:25px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.card{
+  background:rgba(255,255,255,0.07);
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+
+.card h3{
+  margin:0 0 8px;
+  font-size:15px;
+  opacity:0.8;
+}
+
+.card p{
+  margin:0;
+  font-size:16px;
+  font-weight:600;
+}
+
+/* ACTION BUTTONS */
+.actions{
+  margin-top:35px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.actions button{
+  padding:18px;
+  border:none;
+  border-radius:20px;
+  font-size:18px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.add{
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:white;
+}
+
+.analytics-btn{
+  background:linear-gradient(90deg,#06b6d4,#3b82f6);
+  color:white;
+}
+
+.list{
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+}
+
+.actions button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 25px rgba(0,0,0,0.4);
+}
+
+.actions button:active{
+  transform:scale(0.97);
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:65px;
+  background:#0f172a;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-top:1px solid rgba(255,255,255,0.1);
+}
+
+.bottom-nav div{
+  flex:1;
+  text-align:center;
+  font-size:22px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.bottom-nav div:active{
+  transform:scale(0.85);
+}
+
+</style>
 </head>
 
 <body>
@@ -198,21 +186,19 @@
 </div>
 
 <div class="actions">
-
   <button class="add" onclick="location.href='add.html'">
     + Mahsulot qo‘shish
   </button>
 
   <button class="analytics-btn" onclick="location.href='analytics.html'">
-    📊 Tahlil (Analytics)
+    📊 Tahlil
   </button>
 
   <button class="list" onclick="location.href='sales.html'">
     📋 Sotuvlar ro‘yxati
   </button>
-
 </div>
-<!-- Bottom Navigation -->
+
 <div class="bottom-nav">
   <div onclick="location.href='dashboard.html'">🏠</div>
   <div onclick="location.href='add.html'">➕</div>
@@ -225,68 +211,62 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
+const firebaseConfig={
+apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+authDomain:"spare-shop-web.firebaseapp.com",
+projectId:"spare-shop-web",
+storageBucket:"spare-shop-web.firebasestorage.app",
+messagingSenderId:"960113811021",
+appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
 
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-  loadDashboard(user.uid);
+auth.onAuthStateChanged(user=>{
+if(!user){
+window.location.href="index.html";
+return;
+}
+loadDashboard(user.uid);
 });
 
-function loadDashboard(uid) {
-  const now = new Date();
-  const today = new Date(now); today.setHours(0,0,0,0);
-  const weekStart = new Date(today); weekStart.setDate(today.getDate() - 6);
-  const monthStart = new Date(today); monthStart.setDate(1);
+function loadDashboard(uid){
+const now=new Date();
+const today=new Date(now);today.setHours(0,0,0,0);
+const weekStart=new Date(today);weekStart.setDate(today.getDate()-6);
+const monthStart=new Date(today);monthStart.setDate(1);
 
-  let tC=0, tS=0, wC=0, wS=0, mC=0, mS=0;
-  const productCount = {};
+let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
+const productCount={};
 
-  db.collection("users").doc(uid).collection("sales").get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const s = doc.data();
-        if (!s.createdAt) return;
+db.collection("users").doc(uid).collection("sales").get()
+.then(snapshot=>{
+snapshot.forEach(doc=>{
+const s=doc.data();
+if(!s.createdAt)return;
 
-        const d = s.createdAt.toDate();
-        d.setHours(0,0,0,0);
+const d=s.createdAt.toDate();
+d.setHours(0,0,0,0);
 
-        productCount[s.name] = (productCount[s.name] || 0) + 1;
+productCount[s.name]=(productCount[s.name]||0)+1;
 
-        if (d.getTime() === today.getTime()) {
-          tC++; tS += s.price;
-        }
-        if (d >= weekStart) {
-          wC++; wS += s.price;
-        }
-        if (d >= monthStart) {
-          mC++; mS += s.price;
-        }
-      });
+if(d.getTime()===today.getTime()){tC++;tS+=s.price;}
+if(d>=weekStart){wC++;wS+=s.price;}
+if(d>=monthStart){mC++;mS+=s.price;}
+});
 
-      document.getElementById("todayCount").innerText = tC + " dona";
-      document.getElementById("todayTotal").innerText = tS + " so‘m";
-      document.getElementById("weekData").innerText = wC + " dona / " + wS + " so‘m";
-      document.getElementById("monthData").innerText = mC + " dona / " + mS + " so‘m";
+document.getElementById("todayCount").innerText=tC+" dona";
+document.getElementById("todayTotal").innerText=tS+" so‘m";
+document.getElementById("weekData").innerText=wC+" dona / "+wS+" so‘m";
+document.getElementById("monthData").innerText=mC+" dona / "+mS+" so‘m";
 
-      const top = Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
-      document.getElementById("topProduct").innerText =
-        top ? top[0] + " (" + top[1] + " marta)" : "—";
-    });
+const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
+document.getElementById("topProduct").innerText=
+top?top[0]+" ("+top[1]+" marta)":"—";
+});
 }
 </script>
 
