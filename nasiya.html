@@ -116,7 +116,7 @@ auth.onAuthStateChanged(user=>{
     return;
   }
   currentUID=user.uid;
-  loadCustomers(user.uid); // 🔥 load previous customers
+  loadCustomers(user.uid);
 });
 
 /* LOAD CUSTOMER SUGGESTIONS */
@@ -136,7 +136,7 @@ function loadCustomers(uid){
     });
 }
 
-/* SAVE DEBT */
+/* SAVE NASIYA */
 async function saveDebt(){
 
   if(!currentUID) return;
@@ -158,6 +158,7 @@ async function saveDebt(){
 
   try{
 
+    /* 1️⃣ UPDATE DEBT TOTAL */
     const doc=await debtRef.get();
 
     if(doc.exists){
@@ -173,7 +174,19 @@ async function saveDebt(){
       });
     }
 
-    /* 🔥 Redirect like Naqd savdo */
+    /* 2️⃣ SAVE NASIYA PRODUCT (VERY IMPORTANT) */
+    await db
+      .collection("users")
+      .doc(currentUID)
+      .collection("nasiyaSales")
+      .add({
+        name: spareName,
+        price: price,
+        customer: customerName,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    /* 3️⃣ REDIRECT */
     location.href="dashboard.html";
 
   }catch(error){
