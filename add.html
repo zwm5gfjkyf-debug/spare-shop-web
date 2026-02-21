@@ -158,6 +158,15 @@ const firebaseConfig = {
   function goBack() {
     window.location.href = "dashboard.html";
   }
+  await db.collection("users")
+  .doc(uid)
+  .collection("sales")
+  .add({
+    name: spareName,
+    price: price,
+    type: "product",   // MUST BE HERE
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 </script>
 
 </body>
