@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Nasiya Tahlil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  padding:20px;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-bottom:30px;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  padding:20px;
+  border-radius:18px;
+}
+
+.card h3{
+  margin:0 0 10px;
+  font-size:14px;
+  opacity:0.8;
+}
+
+.card p{
+  font-size:20px;
+  font-weight:600;
+  margin:0;
+}
+
+.customer{
+  background:rgba(255,255,255,0.07);
+  padding:18px;
+  border-radius:16px;
+  margin-bottom:15px;
+}
+
+.customer h4{
+  margin:0 0 8px;
+}
+
+.back-btn{
+  margin-top:25px;
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>💳 Nasiya Tahlil</h2>
+
+<div class="stats">
+  <div class="card">
+    <h3>📦 Jami nasiya tovar</h3>
+    <p id="totalItems">0 ta</p>
+  </div>
+
+  <div class="card">
+    <h3>💰 Umumiy nasiya summa</h3>
+    <p id="totalDebt">0 so‘m</p>
+  </div>
+</div>
+
+<div id="customerList"></div>
+
+<button class="back-btn" onclick="location.href='dashboard.html'">
+← Orqaga
+</button>
+
+<script>
+
+const firebaseConfig={
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    location.href="index.html";
+    return;
+  }
+  loadNasiya(user.uid);
+});
+
+function loadNasiya(uid){
+
+  let totalDebt = 0;
+  let totalItems = 0;
+
+  const list = document.getElementById("customerList");
+  list.innerHTML = "";
+
+  db.collection("users")
+    .doc(uid)
+    .collection("debts")
+    .get()
+    .then(snapshot=>{
+
+      snapshot.forEach(doc=>{
+
+        const data = doc.data();
+        const name = doc.id;
+
+        const debt = Number(data.totalDebt || 0);
+        const items = Number(data.totalItems || 0);
+
+        totalDebt += debt;
+        totalItems += items;
+
+        const div = document.createElement("div");
+        div.className = "customer";
+        div.innerHTML = `
+          <h4>${name}</h4>
+          <p>📦 Tovar: ${items} ta</p>
+          <p>💰 Qarzi: ${debt.toLocaleString()} so‘m</p>
+        `;
+
+        list.appendChild(div);
+
+      });
+
+      document.getElementById("totalDebt").innerText =
+        totalDebt.toLocaleString()+" so‘m";
+
+      document.getElementById("totalItems").innerText =
+        totalItems+" ta";
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
