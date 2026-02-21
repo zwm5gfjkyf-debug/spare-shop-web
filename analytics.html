@@ -80,9 +80,30 @@ canvas{
   <canvas id="analyticsChart"></canvas>
 </div>
 
-<div class="stats-card" id="analyticsStats">
-  Yuklanmoqda...
+<div class="stats-grid">
+
+  <div class="stat-card">
+    <div class="stat-title">💰 Umumiy tushum</div>
+    <div class="stat-value" id="totalRevenue">0 so‘m</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-title">📦 Sotilgan mahsulotlar</div>
+    <div class="stat-value" id="totalItems">0 dona</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-title">📊 O‘rtacha savdo</div>
+    <div class="stat-value" id="avgSale">0 so‘m</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-title">🥇 Eng ko‘p sotilgan</div>
+    <div class="stat-value" id="topProduct">—</div>
+  </div>
+
 </div>
+  
 
 <button class="back-btn" onclick="location.href='dashboard.html'">
   ← Orqaga
@@ -135,30 +156,36 @@ function loadAnalytics(uid){
         return;
       }
 
-      let total=0;
-      let labels=[];
-      let data=[];
+   let totalRevenue = 0;
+let totalItems = 0;
+let productCount = {};
 
-      let hourTotals={};
-      let dayTotals={};
-      let productCount={};
+snapshot.forEach(doc=>{
+  const sale = doc.data();
+  if(!sale.createdAt) return;
 
-      snapshot.forEach(doc=>{
-        const sale=doc.data();
-        if(!sale.createdAt) return;
+  totalRevenue += sale.price;
+  totalItems++;
 
-        const date=sale.createdAt.toDate();
-        const hour=date.getHours();
-        const day=date.toLocaleDateString("uz-UZ");
+  productCount[sale.name] = (productCount[sale.name]||0)+1;
+});
 
-        total+=sale.price;
-        labels.push(labels.length+1);
-        data.push(total);
+const avgSale = totalItems ? Math.round(totalRevenue/totalItems) : 0;
 
-        hourTotals[hour]=(hourTotals[hour]||0)+sale.price;
-        dayTotals[day]=(dayTotals[day]||0)+sale.price;
-        productCount[sale.name]=(productCount[sale.name]||0)+1;
-      });
+const top = Object.entries(productCount)
+  .sort((a,b)=>b[1]-a[1])[0];
+
+document.getElementById("totalRevenue").innerText =
+  totalRevenue.toLocaleString() + " so‘m";
+
+document.getElementById("totalItems").innerText =
+  totalItems + " dona";
+
+document.getElementById("avgSale").innerText =
+  avgSale.toLocaleString() + " so‘m";
+
+document.getElementById("topProduct").innerText =
+  top ? top[0] : "—";
 
       drawChart(labels,data);
 
@@ -210,7 +237,30 @@ function drawChart(labels,data){
     }
   });
 }
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-bottom:25px;
+}
 
+.stat-card{
+  background:rgba(255,255,255,0.07);
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.stat-title{
+  font-size:14px;
+  opacity:0.7;
+  margin-bottom:8px;
+}
+
+.stat-value{
+  font-size:20px;
+  font-weight:600;
+}
 </script>
 
 </body>
