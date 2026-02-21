@@ -83,7 +83,8 @@ button{
 <input type="number" id="price" placeholder="Masalan: 20000">
 
 <label>Mijoz ismi</label>
-<input type="text" id="customerName" placeholder="Masalan: Bobur">
+<input type="text" id="customerName" list="customers" placeholder="Mijoz ismi">
+<datalist id="customers"></datalist>
 
 <button class="save" onclick="saveDebt()">Saqlash</button>
 <button class="back" onclick="location.href='dashboard.html'">← Orqaga</button>
@@ -108,14 +109,34 @@ const db = firebase.firestore();
 
 let currentUID=null;
 
+/* LOAD USER */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="index.html";
     return;
   }
   currentUID=user.uid;
+  loadCustomers(user.uid); // 🔥 load previous customers
 });
 
+/* LOAD CUSTOMER SUGGESTIONS */
+function loadCustomers(uid){
+  db.collection("users")
+    .doc(uid)
+    .collection("debts")
+    .get()
+    .then(snapshot=>{
+      const list=document.getElementById("customers");
+      list.innerHTML="";
+      snapshot.forEach(doc=>{
+        const option=document.createElement("option");
+        option.value=doc.id;
+        list.appendChild(option);
+      });
+    });
+}
+
+/* SAVE DEBT */
 async function saveDebt(){
 
   if(!currentUID) return;
@@ -152,7 +173,7 @@ async function saveDebt(){
       });
     }
 
-    /* 🔥 INSTANT REDIRECT */
+    /* 🔥 Redirect like Naqd savdo */
     location.href="dashboard.html";
 
   }catch(error){
