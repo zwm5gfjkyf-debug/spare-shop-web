@@ -139,11 +139,12 @@ const firebaseConfig = {
   db.collection("users")
     .doc(user.uid)
     .collection("sales")
-    .add({
-      name: name,
-      price: price,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
+   .add({
+  name: spareName,
+  price: price,
+  type: "product",   // 🔥
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
     .then(() => {
       window.location.href = "dashboard.html";
     })
