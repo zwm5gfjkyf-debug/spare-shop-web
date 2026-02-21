@@ -190,29 +190,54 @@ function loadNasiya(uid){
         list.appendChild(div);
 
         /* LOAD ITEMS */
-        const itemsSnap = await db
-          .collection("users")
-          .doc(uid)
-          .collection("debts")
-          .doc(name)
-          .collection("items")
-          .orderBy("createdAt","desc")
-          .get();
+        /* LOAD ITEMS (NEW STRUCTURE) */
+const itemsContainer = document.getElementById("items-"+name);
 
-        const itemsContainer = document.getElementById("items-"+name);
+const itemsSnap = await db
+  .collection("users")
+  .doc(uid)
+  .collection("debts")
+  .doc(name)
+  .collection("items")
+  .orderBy("createdAt","desc")
+  .get();
 
-        itemsSnap.forEach(itemDoc=>{
-          const item = itemDoc.data();
-          const date = item.createdAt
-            ? item.createdAt.toDate().toLocaleString("uz-UZ")
-            : "";
-          itemsContainer.innerHTML += `
-            <div class="item-line">
-              • ${item.spareName} - ${item.price.toLocaleString()} so‘m 
-              <span style="opacity:0.6;">(${date})</span>
-            </div>
-          `;
-        });
+if(!itemsSnap.empty){
+  itemsSnap.forEach(itemDoc=>{
+    const item = itemDoc.data();
+    const date = item.createdAt
+      ? item.createdAt.toDate().toLocaleString("uz-UZ")
+      : "";
+    itemsContainer.innerHTML += `
+      <div class="item-line">
+        • ${item.spareName} - ${item.price.toLocaleString()} so‘m 
+        <span style="opacity:0.6;">(${date})</span>
+      </div>
+    `;
+  });
+}
+
+/* LOAD ITEMS (OLD STRUCTURE COMPATIBILITY) */
+const oldSnap = await db
+  .collection("users")
+  .doc(uid)
+  .collection("nasiyaSales")
+  .where("customer","==",name)
+  .orderBy("createdAt","desc")
+  .get();
+
+oldSnap.forEach(oldDoc=>{
+  const item = oldDoc.data();
+  const date = item.createdAt
+    ? item.createdAt.toDate().toLocaleString("uz-UZ")
+    : "";
+  itemsContainer.innerHTML += `
+    <div class="item-line">
+      • ${item.name} - ${item.price.toLocaleString()} so‘m 
+      <span style="opacity:0.6;">(${date})</span>
+    </div>
+  `;
+});
 
         /* LOAD PAYMENTS */
         const paySnap = await db
