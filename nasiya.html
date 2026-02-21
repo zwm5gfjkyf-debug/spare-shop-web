@@ -79,12 +79,14 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+let currentUID;
+
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="index.html";
     return;
   }
-  window.currentUID = user.uid;
+  currentUID = user.uid;
 });
 
 async function saveDebt(){
