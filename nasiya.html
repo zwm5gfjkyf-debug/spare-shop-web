@@ -78,20 +78,21 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUID;
+let currentUID = null;
 
+/* AUTH */
 auth.onAuthStateChanged(user=>{
   if(!user){
-    location.href="index.html";
+    window.location.href="index.html";
     return;
   }
   currentUID = user.uid;
 });
 
+/* SAVE NASIYA */
 async function saveDebt(){
 
   if(!currentUID){
-    alert("User not ready. Refresh page.");
     return;
   }
 
@@ -127,11 +128,8 @@ async function saveDebt(){
       });
     }
 
-    alert("Nasiya saqlandi ✅");
-
-    document.getElementById("spareName").value="";
-    document.getElementById("price").value="";
-    document.getElementById("customerName").value="";
+    /* 🔥 IMPORTANT: redirect instantly like naqd savdo */
+    window.location.href = "dashboard.html";
 
   } catch(error){
     console.error(error);
