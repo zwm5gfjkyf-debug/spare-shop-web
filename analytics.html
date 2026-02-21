@@ -86,6 +86,17 @@ canvas{
 </div>
 
 <div class="stats-grid">
+
+  <div class="stat-card">
+    <div class="stat-title">💵 Naqd tushum</div>
+    <div class="stat-value" id="cashRevenue">0 so‘m</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-title">💳 Nasiya summa</div>
+    <div class="stat-value" id="debtRevenue">0 so‘m</div>
+  </div>
+
   <div class="stat-card">
     <div class="stat-title">💰 Umumiy tushum</div>
     <div class="stat-value" id="totalRevenue">0 so‘m</div>
@@ -105,6 +116,7 @@ canvas{
     <div class="stat-title">🥇 Eng ko‘p sotilgan</div>
     <div class="stat-value" id="topProduct">—</div>
   </div>
+
 </div>
 
 <button class="back-btn" onclick="location.href='dashboard.html'">
@@ -131,7 +143,6 @@ const db = firebase.firestore();
 const ctx = document.getElementById("analyticsChart").getContext("2d");
 let chart;
 
-/* AUTH */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="index.html";
@@ -140,9 +151,16 @@ auth.onAuthStateChanged(user=>{
   loadAnalytics(user.uid);
 });
 
-/* LOAD ANALYTICS */
 function loadAnalytics(uid){
 
+  let cashRevenue = 0;
+  let totalItems = 0;
+  let productCount = {};
+  let cumulative = [];
+  let labels = [];
+  let sum = 0;
+
+  // 🔹 LOAD NAQD SALES
   db.collection("users")
     .doc(uid)
     .collection("sales")
@@ -150,28 +168,14 @@ function loadAnalytics(uid){
     .get()
     .then(snapshot=>{
 
-      if(snapshot.empty) return;
-
-      let totalRevenue = 0;
-      let totalItems = 0;
-      let productCount = {};
-
-      let cumulative = [];
-      let labels = [];
-      let sum = 0;
-
       snapshot.forEach((doc,index)=>{
         const sale = doc.data();
         if(!sale.createdAt) return;
 
-        // 🔥 PRICE CLEANER (IMPORTANT)
-        let rawPrice = sale.price.toString();
-        rawPrice = rawPrice.replace(/,/g,'').replace(/\s/g,'');
-
-        const price = parseFloat(rawPrice);
+        const price = Number(sale.price);
         if(isNaN(price)) return;
 
-        totalRevenue += price;
+        cashRevenue += price;
         totalItems++;
 
         if(sale.name){
@@ -183,13 +187,13 @@ function loadAnalytics(uid){
         labels.push(index+1);
       });
 
-      const avgSale = totalItems ? Math.round(totalRevenue/totalItems) : 0;
+      const avgSale = totalItems ? Math.round(cashRevenue/totalItems) : 0;
 
       const top = Object.entries(productCount)
         .sort((a,b)=>b[1]-a[1])[0];
 
-      document.getElementById("totalRevenue").innerText =
-        totalRevenue.toLocaleString() + " so‘m";
+      document.getElementById("cashRevenue").innerText =
+        cashRevenue.toLocaleString() + " so‘m";
 
       document.getElementById("totalItems").innerText =
         totalItems + " dona";
@@ -202,10 +206,35 @@ function loadAnalytics(uid){
 
       drawChart(labels,cumulative);
 
+      // 🔹 LOAD NASIYA
+      db.collection("users")
+        .doc(uid)
+        .collection("debts")
+        .get()
+        .then(debtSnap=>{
+
+          let debtRevenue = 0;
+
+          debtSnap.forEach(doc=>{
+            const debt = doc.data();
+            if(debt.totalDebt){
+              debtRevenue += Number(debt.totalDebt);
+            }
+          });
+
+          document.getElementById("debtRevenue").innerText =
+            debtRevenue.toLocaleString() + " so‘m";
+
+          const total = cashRevenue + debtRevenue;
+
+          document.getElementById("totalRevenue").innerText =
+            total.toLocaleString() + " so‘m";
+
+        });
+
     });
 }
 
-/* DRAW CHART */
 function drawChart(labels,data){
 
   if(chart) chart.destroy();
@@ -236,7 +265,6 @@ function drawChart(labels,data){
     }
   });
 }
-
 </script>
 
 </body>
