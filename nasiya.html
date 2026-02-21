@@ -158,36 +158,30 @@ async function saveDebt(){
 
   try{
 
-    /* 1️⃣ UPDATE DEBT TOTAL */
     const doc=await debtRef.get();
 
-   if(doc.exists){
-  await debtRef.update({
-    totalDebt: firebase.firestore.FieldValue.increment(price),
-    totalItems: firebase.firestore.FieldValue.increment(1), // ✅ ADD THIS
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}else{
-  await debtRef.set({
-    totalDebt: price,
-    totalItems: 1, // ✅ ADD THIS
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-    /* 2️⃣ SAVE NASIYA PRODUCT (VERY IMPORTANT) */
-    await db
-      .collection("users")
-      .doc(currentUID)
-      .collection("nasiyaSales")
-      .add({
-        name: spareName,
-        price: price,
-        customer: customerName,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    if(doc.exists){
+      await debtRef.update({
+        totalDebt: firebase.firestore.FieldValue.increment(price),
+        totalItems: firebase.firestore.FieldValue.increment(1),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+    }else{
+      await debtRef.set({
+        totalDebt: price,
+        totalItems: 1,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
 
-    /* 3️⃣ REDIRECT */
+    /* 🔥 SAVE ITEM INSIDE DEBT (IMPORTANT) */
+    await debtRef.collection("items").add({
+      spareName: spareName,
+      price: price,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
     location.href="dashboard.html";
 
   }catch(error){
