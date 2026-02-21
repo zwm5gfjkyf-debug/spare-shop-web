@@ -108,10 +108,8 @@ canvas{
 <button class="back-btn" onclick="location.href='dashboard.html'">
   ← Orqaga
 </button>
-
 <script>
 
-/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
@@ -146,7 +144,6 @@ function loadAnalytics(uid){
   let labels = [];
   let sum = 0;
 
-  // 🔹 LOAD NAQD SALES
   db.collection("users")
     .doc(uid)
     .collection("sales")
@@ -173,8 +170,6 @@ function loadAnalytics(uid){
         labels.push(index+1);
       });
 
-      const avgSale = totalItems ? Math.round(cashRevenue/totalItems) : 0;
-
       const top = Object.entries(productCount)
         .sort((a,b)=>b[1]-a[1])[0];
 
@@ -184,40 +179,10 @@ function loadAnalytics(uid){
       document.getElementById("totalItems").innerText =
         totalItems + " dona";
 
-      document.getElementById("avgSale").innerText =
-        avgSale.toLocaleString() + " so‘m";
-
       document.getElementById("topProduct").innerText =
         top ? top[0] : "—";
 
       drawChart(labels,cumulative);
-
-      // 🔹 LOAD NASIYA
-      db.collection("users")
-        .doc(uid)
-        .collection("debts")
-        .get()
-        .then(debtSnap=>{
-
-          let debtRevenue = 0;
-
-          debtSnap.forEach(doc=>{
-            const debt = doc.data();
-            if(debt.totalDebt){
-              debtRevenue += Number(debt.totalDebt);
-            }
-          });
-
-          document.getElementById("debtRevenue").innerText =
-            debtRevenue.toLocaleString() + " so‘m";
-
-          const total = cashRevenue + debtRevenue;
-
-          document.getElementById("totalRevenue").innerText =
-            total.toLocaleString() + " so‘m";
-
-        });
-
     });
 }
 
@@ -251,7 +216,7 @@ function drawChart(labels,data){
     }
   });
 }
-</script>
 
+</script>
 </body>
 </html>
