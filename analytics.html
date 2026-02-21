@@ -38,7 +38,6 @@ canvas{
   height:380px !important;
 }
 
-/* STATS GRID */
 .stats-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -74,15 +73,6 @@ canvas{
   font-size:18px;
   cursor:pointer;
   font-weight:600;
-  transition:0.2s;
-}
-
-.back-btn:hover{
-  transform:translateY(-3px);
-}
-
-.back-btn:active{
-  transform:scale(0.97);
 }
 </style>
 </head>
@@ -96,7 +86,6 @@ canvas{
 </div>
 
 <div class="stats-grid">
-
   <div class="stat-card">
     <div class="stat-title">💰 Umumiy tushum</div>
     <div class="stat-value" id="totalRevenue">0 so‘m</div>
@@ -116,7 +105,6 @@ canvas{
     <div class="stat-title">🥇 Eng ko‘p sotilgan</div>
     <div class="stat-value" id="topProduct">—</div>
   </div>
-
 </div>
 
 <button class="back-btn" onclick="location.href='dashboard.html'">
@@ -162,9 +150,7 @@ function loadAnalytics(uid){
     .get()
     .then(snapshot=>{
 
-      if(snapshot.empty){
-        return;
-      }
+      if(snapshot.empty) return;
 
       let totalRevenue = 0;
       let totalItems = 0;
@@ -178,12 +164,21 @@ function loadAnalytics(uid){
         const sale = doc.data();
         if(!sale.createdAt) return;
 
-totalRevenue += Number(sale.price);
+        // 🔥 PRICE CLEANER (IMPORTANT)
+        let rawPrice = sale.price.toString();
+        rawPrice = rawPrice.replace(/,/g,'').replace(/\s/g,'');
+
+        const price = parseFloat(rawPrice);
+        if(isNaN(price)) return;
+
+        totalRevenue += price;
         totalItems++;
 
-        productCount[sale.name] = (productCount[sale.name]||0)+1;
+        if(sale.name){
+          productCount[sale.name] = (productCount[sale.name]||0)+1;
+        }
 
-sum += Number(sale.price);
+        sum += price;
         cumulative.push(sum);
         labels.push(index+1);
       });
@@ -218,9 +213,9 @@ function drawChart(labels,data){
   chart = new Chart(ctx,{
     type:"line",
     data:{
-      labels,
+      labels:labels,
       datasets:[{
-        data,
+        data:data,
         borderColor:"#22c55e",
         backgroundColor:"rgba(34,197,94,0.2)",
         fill:true,
@@ -234,7 +229,7 @@ function drawChart(labels,data){
       scales:{
         y:{
           ticks:{
-            callback:value=>value+" so‘m"
+            callback:value=>value.toLocaleString()+" so‘m"
           }
         }
       }
