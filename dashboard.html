@@ -213,15 +213,18 @@ loadDashboard(user.uid);
 });
 
 function loadDashboard(uid){
+
 const now=new Date();
 const today=new Date(now);today.setHours(0,0,0,0);
 const weekStart=new Date(today);weekStart.setDate(today.getDate()-6);
 const monthStart=new Date(today);monthStart.setDate(1);
 
 let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
-let debtCount=0,debtTotal=0;
+let nasiyaCount=0,nasiyaTotal=0;
+
 const productCount={};
 
+/* ===== NAQD (sales) ===== */
 db.collection("users").doc(uid).collection("sales").get()
 .then(snapshot=>{
 snapshot.forEach(doc=>{
@@ -239,30 +242,31 @@ if(d>=monthStart){mC++;mS+=s.price;}
 });
 
 document.getElementById("todayCount").innerText=tC+" dona";
-document.getElementById("todayTotal").innerText=tS+" so‘m";
-document.getElementById("weekData").innerText=wC+" dona / "+wS+" so‘m";
-document.getElementById("monthData").innerText=mC+" dona / "+mS+" so‘m";
+document.getElementById("todayTotal").innerText=tS.toLocaleString()+" so‘m";
+document.getElementById("weekData").innerText=wC+" dona / "+wS.toLocaleString()+" so‘m";
+document.getElementById("monthData").innerText=mC+" dona / "+mS.toLocaleString()+" so‘m";
 
 const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
 document.getElementById("topProduct").innerText=
 top?top[0]+" ("+top[1]+" marta)":"—";
 });
 
-/* LOAD NASIYA */
-db.collection("users").doc(uid).collection("debts").get()
+
+/* ===== NASIYA PRODUCTS ===== */
+db.collection("users").doc(uid).collection("nasiyaSales").get()
 .then(snapshot=>{
+nasiyaCount = snapshot.size;
+
 snapshot.forEach(doc=>{
-const d=doc.data();
-if(d.totalDebt>0){
-debtCount++;
-debtTotal+=d.totalDebt;
-}
+const s=doc.data();
+nasiyaTotal += s.price;
 });
 
-document.getElementById("debtCount").innerText=debtCount+" ta";
+document.getElementById("debtCount").innerText=nasiyaCount+" ta";
 document.getElementById("debtTotal").innerText=
-debtTotal.toLocaleString()+" so‘m";
+nasiyaTotal.toLocaleString()+" so‘m";
 });
+
 }
 </script>
 
