@@ -68,9 +68,9 @@ canvas{
 .sale{
   display:flex;
   justify-content:space-between;
-  padding:14px 0;
+  align-items:center;
+  padding:16px 0;
   border-bottom:1px solid rgba(255,255,255,0.08);
-  font-size:14px;
 }
 
 .sale:last-child{
@@ -231,7 +231,21 @@ function loadToday(){
 
         const div=document.createElement("div");
         div.className="sale";
-        div.innerHTML=`<span>${sale.name}</span><strong>${sale.price} so‘m</strong>`;
+     const time = sale.createdAt
+  .toDate()
+  .toLocaleTimeString("uz-UZ", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+
+div.innerHTML = `
+  <div>
+    <div style="font-weight:600;">${sale.name}</div>
+    <div style="font-size:12px;color:#aaa;">🕒 ${time}</div>
+  </div>
+  <strong>${Number(sale.price).toLocaleString()} so‘m</strong>
+`;
         list.appendChild(div);
       });
 
