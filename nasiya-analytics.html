@@ -226,14 +226,15 @@ async function payDebt(customerName){
   });
 
   /* 2️⃣ Add to today's income (VERY IMPORTANT) */
-  await db.collection("users")
-    .doc(uid)
-    .collection("sales")
-    .add({
-      name: "Nasiya to‘lov (" + customerName + ")",
-      price: amount,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+await db.collection("users")
+  .doc(uid)
+  .collection("sales")
+  .add({
+    name: "Nasiya to‘lov (" + customerName + ")",
+    price: amount,
+    type: "payment", // 🔥 important
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 
   /* 3️⃣ Update or delete debt */
   if(newDebt <= 0){
