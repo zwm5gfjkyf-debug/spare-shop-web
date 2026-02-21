@@ -257,11 +257,29 @@ db.collection("users").doc(uid).collection("sales").get()
     if(!s.type || s.type === "product"){
         tC++;
     }
-}
-      if(d>=weekStart){wC++;wS+=s.price;}
-      if(d>=monthStart){mC++;mS+=s.price;}
-    });
+/* WEEK */
+if(d >= weekStart){
 
+  // Always add money
+  wS += s.price;
+
+  // Only increase item count for product
+  if(!s.type || s.type === "product"){
+    wC++;
+  }
+}
+
+/* MONTH */
+if(d >= monthStart){
+
+  // Always add money
+  mS += s.price;
+
+  // Only increase item count for product
+  if(!s.type || s.type === "product"){
+    mC++;
+  }
+}
     document.getElementById("todayCount").innerText=tC+" dona";
     document.getElementById("todayTotal").innerText=tS+" so‘m";
     document.getElementById("weekData").innerText=wC+" dona / "+wS+" so‘m";
