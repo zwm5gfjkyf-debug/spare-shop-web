@@ -286,10 +286,9 @@ nasiyaTotal.toLocaleString()+" so‘m";
 });
 
 }
-  async function resetAllData(){
+ async function resetAllData(){
 
   const confirmReset = confirm("Barcha ma'lumotlar o‘chiriladi! Davom etasizmi?");
-
   if(!confirmReset) return;
 
   const user = auth.currentUser;
@@ -299,27 +298,33 @@ nasiyaTotal.toLocaleString()+" so‘m";
 
   try{
 
-    // DELETE SALES
+    // 🔥 DELETE SALES
     const salesSnap = await db
       .collection("users")
       .doc(uid)
       .collection("sales")
       .get();
 
-    for(const doc of salesSnap.docs){
-      await doc.ref.delete();
-    }
+    const salesBatch = db.batch();
+    salesSnap.forEach(doc=>{
+      salesBatch.delete(doc.ref);
+    });
+    await salesBatch.commit();
 
-    // DELETE DEBTS
+
+    // 🔥 DELETE DEBTS
     const debtSnap = await db
       .collection("users")
       .doc(uid)
       .collection("debts")
       .get();
 
-    for(const doc of debtSnap.docs){
-      await doc.ref.delete();
-    }
+    const debtBatch = db.batch();
+    debtSnap.forEach(doc=>{
+      debtBatch.delete(doc.ref);
+    });
+    await debtBatch.commit();
+
 
     alert("Barcha ma'lumotlar o‘chirildi ✅");
 
@@ -330,7 +335,3 @@ nasiyaTotal.toLocaleString()+" so‘m";
     alert("Xatolik yuz berdi");
   }
 }
-</script>
-
-</body>
-</html>
