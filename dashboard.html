@@ -208,6 +208,7 @@ body{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+
 const firebaseConfig={
 apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
 authDomain:"spare-shop-web.firebaseapp.com",
@@ -242,7 +243,7 @@ let nasiyaCount=0,nasiyaTotal=0;
 
 const productCount={};
 
-/* ===== NAQD (sales) ===== */
+/* ===== NAQD SALES ===== */
 db.collection("users").doc(uid).collection("sales").get()
 .then(snapshot=>{
 
@@ -252,52 +253,67 @@ db.collection("users").doc(uid).collection("sales").get()
     document.getElementById("weekData").innerText="0 dona / 0 so‘m";
     document.getElementById("monthData").innerText="0 dona / 0 so‘m";
     document.getElementById("topProduct").innerText="—";
+  } else {
+
+    snapshot.forEach(doc=>{
+      const s=doc.data();
+      if(!s.createdAt)return;
+
+      const d=s.createdAt.toDate();
+      d.setHours(0,0,0,0);
+
+      productCount[s.name]=(productCount[s.name]||0)+1;
+
+      if(d.getTime()===today.getTime()){tC++;tS+=s.price;}
+      if(d>=weekStart){wC++;wS+=s.price;}
+      if(d>=monthStart){mC++;mS+=s.price;}
+    });
+
+    document.getElementById("todayCount").innerText=tC+" dona";
+    document.getElementById("todayTotal").innerText=tS+" so‘m";
+    document.getElementById("weekData").innerText=wC+" dona / "+wS+" so‘m";
+    document.getElementById("monthData").innerText=mC+" dona / "+mS+" so‘m";
+
+    const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById("topProduct").innerText=
+    top?top[0]+" ("+top[1]+" marta)":"—";
+  }
+
+});
+
+
+/* ===== NASIYA (DEBTS) ===== */
+db.collection("users").doc(uid).collection("debts").get()
+.then(snapshot=>{
+
+  if(snapshot.empty){
+    document.getElementById("debtCount").innerText="0 ta";
+    document.getElementById("debtTotal").innerText="0 so‘m";
     return;
   }
 
   snapshot.forEach(doc=>{
-    const s=doc.data();
-    if(!s.createdAt)return;
+    const d=doc.data();
 
-    const d=s.createdAt.toDate();
-    d.setHours(0,0,0,0);
+    if(d.totalItems){
+      nasiyaCount += d.totalItems;
+    }
 
-    productCount[s.name]=(productCount[s.name]||0)+1;
-
-    if(d.getTime()===today.getTime()){tC++;tS+=s.price;}
-    if(d>=weekStart){wC++;wS+=s.price;}
-    if(d>=monthStart){mC++;mS+=s.price;}
+    if(d.totalDebt){
+      nasiyaTotal += d.totalDebt;
+    }
   });
 
-  document.getElementById("todayCount").innerText=tC+" dona";
-  document.getElementById("todayTotal").innerText=tS+" so‘m";
-  document.getElementById("weekData").innerText=wC+" dona / "+wS+" so‘m";
-  document.getElementById("monthData").innerText=mC+" dona / "+mS+" so‘m";
-
-  const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById("topProduct").innerText=
-  top?top[0]+" ("+top[1]+" marta)":"—";
-
-});
-
-
-/* ===== NASIYA PRODUCTS ===== */
-db.collection("users").doc(uid).collection("nasiyaSales").get()
-.then(snapshot=>{
-nasiyaCount = snapshot.size;
-
-snapshot.forEach(doc=>{
-const s=doc.data();
-nasiyaTotal += s.price;
-});
-
-document.getElementById("debtCount").innerText=nasiyaCount+" ta";
-document.getElementById("debtTotal").innerText=
-nasiyaTotal.toLocaleString()+" so‘m";
+  document.getElementById("debtCount").innerText=nasiyaCount+" ta";
+  document.getElementById("debtTotal").innerText=
+  nasiyaTotal.toLocaleString()+" so‘m";
 });
 
 }
- async function resetAllData(){
+
+
+/* ===== RESET FUNCTION ===== */
+async function resetAllData(){
 
   const confirmReset = confirm("Barcha ma'lumotlar o‘chiriladi! Davom etasizmi?");
   if(!confirmReset) return;
@@ -309,36 +325,19 @@ nasiyaTotal.toLocaleString()+" so‘m";
 
   try{
 
-    // 🔥 DELETE SALES
-    const salesSnap = await db
-      .collection("users")
-      .doc(uid)
-      .collection("sales")
-      .get();
-
+    // DELETE SALES
+    const salesSnap = await db.collection("users").doc(uid).collection("sales").get();
     const salesBatch = db.batch();
-    salesSnap.forEach(doc=>{
-      salesBatch.delete(doc.ref);
-    });
+    salesSnap.forEach(doc=> salesBatch.delete(doc.ref));
     await salesBatch.commit();
 
-
-    // 🔥 DELETE DEBTS
-    const debtSnap = await db
-      .collection("users")
-      .doc(uid)
-      .collection("debts")
-      .get();
-
+    // DELETE DEBTS
+    const debtSnap = await db.collection("users").doc(uid).collection("debts").get();
     const debtBatch = db.batch();
-    debtSnap.forEach(doc=>{
-      debtBatch.delete(doc.ref);
-    });
+    debtSnap.forEach(doc=> debtBatch.delete(doc.ref));
     await debtBatch.commit();
 
-
     alert("Barcha ma'lumotlar o‘chirildi ✅");
-
     location.reload();
 
   }catch(error){
@@ -346,3 +345,5 @@ nasiyaTotal.toLocaleString()+" so‘m";
     alert("Xatolik yuz berdi");
   }
 }
+
+</script>
