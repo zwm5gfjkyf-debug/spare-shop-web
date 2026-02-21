@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -39,14 +38,30 @@ canvas{
   height:380px !important;
 }
 
-.stats-card{
-  background:rgba(255,255,255,0.07);
-  border-radius:22px;
-  padding:25px;
-  box-shadow:0 15px 40px rgba(0,0,0,0.5);
+/* STATS GRID */
+.stats-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
   margin-bottom:25px;
-  line-height:1.9;
-  font-size:18px;
+}
+
+.stat-card{
+  background:rgba(255,255,255,0.07);
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.stat-title{
+  font-size:14px;
+  opacity:0.7;
+  margin-bottom:8px;
+}
+
+.stat-value{
+  font-size:20px;
+  font-weight:600;
 }
 
 .back-btn{
@@ -103,7 +118,6 @@ canvas{
   </div>
 
 </div>
-  
 
 <button class="back-btn" onclick="location.href='dashboard.html'">
   ← Orqaga
@@ -111,8 +125,7 @@ canvas{
 
 <script>
 
-/* ================= FIREBASE ================= */
-
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
@@ -130,8 +143,7 @@ const db = firebase.firestore();
 const ctx = document.getElementById("analyticsChart").getContext("2d");
 let chart;
 
-/* ================= AUTH ================= */
-
+/* AUTH */
 auth.onAuthStateChanged(user=>{
   if(!user){
     location.href="index.html";
@@ -140,8 +152,7 @@ auth.onAuthStateChanged(user=>{
   loadAnalytics(user.uid);
 });
 
-/* ================= LOAD ANALYTICS ================= */
-
+/* LOAD ANALYTICS */
 function loadAnalytics(uid){
 
   db.collection("users")
@@ -152,66 +163,59 @@ function loadAnalytics(uid){
     .then(snapshot=>{
 
       if(snapshot.empty){
-        document.getElementById("analyticsStats").innerHTML="Ma'lumot yo‘q";
         return;
       }
 
-   let totalRevenue = 0;
-let totalItems = 0;
-let productCount = {};
+      let totalRevenue = 0;
+      let totalItems = 0;
+      let productCount = {};
 
-snapshot.forEach(doc=>{
-  const sale = doc.data();
-  if(!sale.createdAt) return;
+      let cumulative = [];
+      let labels = [];
+      let sum = 0;
 
-  totalRevenue += sale.price;
-  totalItems++;
+      snapshot.forEach((doc,index)=>{
+        const sale = doc.data();
+        if(!sale.createdAt) return;
 
-  productCount[sale.name] = (productCount[sale.name]||0)+1;
-});
+        totalRevenue += sale.price;
+        totalItems++;
 
-const avgSale = totalItems ? Math.round(totalRevenue/totalItems) : 0;
+        productCount[sale.name] = (productCount[sale.name]||0)+1;
 
-const top = Object.entries(productCount)
-  .sort((a,b)=>b[1]-a[1])[0];
+        sum += sale.price;
+        cumulative.push(sum);
+        labels.push(index+1);
+      });
 
-document.getElementById("totalRevenue").innerText =
-  totalRevenue.toLocaleString() + " so‘m";
+      const avgSale = totalItems ? Math.round(totalRevenue/totalItems) : 0;
 
-document.getElementById("totalItems").innerText =
-  totalItems + " dona";
+      const top = Object.entries(productCount)
+        .sort((a,b)=>b[1]-a[1])[0];
 
-document.getElementById("avgSale").innerText =
-  avgSale.toLocaleString() + " so‘m";
+      document.getElementById("totalRevenue").innerText =
+        totalRevenue.toLocaleString() + " so‘m";
 
-document.getElementById("topProduct").innerText =
-  top ? top[0] : "—";
+      document.getElementById("totalItems").innerText =
+        totalItems + " dona";
 
-      drawChart(labels,data);
+      document.getElementById("avgSale").innerText =
+        avgSale.toLocaleString() + " so‘m";
 
-      const bestHour=Object.entries(hourTotals).sort((a,b)=>b[1]-a[1])[0];
-      const bestDay=Object.entries(dayTotals).sort((a,b)=>b[1]-a[1])[0];
-      const topProduct=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
+      document.getElementById("topProduct").innerText =
+        top ? top[0] : "—";
 
-      const growth = ((data[data.length-1] - data[0]) / data[0] * 100).toFixed(1);
-
-      document.getElementById("analyticsStats").innerHTML=`
-        🕒 Eng yaxshi soat: <b>${bestHour ? bestHour[0]+":00" : "-"}</b><br>
-        📅 Eng yaxshi kun: <b>${bestDay ? bestDay[0] : "-"}</b><br>
-        💎 Eng ko‘p sotilgan mahsulot: <b>${topProduct ? topProduct[0] : "-"}</b><br>
-        📈 O‘sish: <b>${isFinite(growth)?growth:0}%</b>
-      `;
+      drawChart(labels,cumulative);
 
     });
 }
 
-/* ================= DRAW CHART ================= */
-
+/* DRAW CHART */
 function drawChart(labels,data){
 
   if(chart) chart.destroy();
 
-  chart=new Chart(ctx,{
+  chart = new Chart(ctx,{
     type:"line",
     data:{
       labels,
@@ -237,30 +241,7 @@ function drawChart(labels,data){
     }
   });
 }
-.stats-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-bottom:25px;
-}
 
-.stat-card{
-  background:rgba(255,255,255,0.07);
-  padding:18px;
-  border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
-
-.stat-title{
-  font-size:14px;
-  opacity:0.7;
-  margin-bottom:8px;
-}
-
-.stat-value{
-  font-size:20px;
-  font-weight:600;
-}
 </script>
 
 </body>
