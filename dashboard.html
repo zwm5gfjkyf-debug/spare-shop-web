@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-
 body{
   margin:0;
   font-family:'Segoe UI', Arial, sans-serif;
@@ -20,14 +19,12 @@ body{
   min-height:100vh;
 }
 
-/* HEADER */
 .header{
   font-size:22px;
   font-weight:600;
   margin-bottom:25px;
 }
 
-/* TOP CARDS */
 .top{
   display:flex;
   gap:15px;
@@ -45,16 +42,11 @@ body{
   transition:0.2s;
 }
 
-.big:hover{
-  transform:translateY(-4px);
-}
-
 .big h1{
   margin:12px 0 0;
   font-size:34px;
 }
 
-/* SMALL CARDS */
 .cards{
   margin-top:25px;
   display:grid;
@@ -81,7 +73,6 @@ body{
   font-weight:600;
 }
 
-/* ACTION BUTTONS */
 .actions{
   margin-top:35px;
   display:flex;
@@ -96,7 +87,6 @@ body{
   font-size:18px;
   font-weight:600;
   cursor:pointer;
-  transition:0.2s;
 }
 
 .add{
@@ -114,16 +104,6 @@ body{
   color:white;
 }
 
-.actions button:hover{
-  transform:translateY(-3px);
-  box-shadow:0 12px 25px rgba(0,0,0,0.4);
-}
-
-.actions button:active{
-  transform:scale(0.97);
-}
-
-/* BOTTOM NAV */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -136,19 +116,6 @@ body{
   align-items:center;
   border-top:1px solid rgba(255,255,255,0.1);
 }
-
-.bottom-nav div{
-  flex:1;
-  text-align:center;
-  font-size:22px;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.bottom-nav div:active{
-  transform:scale(0.85);
-}
-
 </style>
 </head>
 
@@ -156,6 +123,7 @@ body{
 
 <div class="header">Spare Shop</div>
 
+<!-- ROW 1 -->
 <div class="top">
   <div class="big">
     <div><i class="fa-solid fa-box-open"></i> Bugun sotildi</div>
@@ -168,7 +136,19 @@ body{
   </div>
 </div>
 
+<!-- ROW 2 (NASIYA) -->
 <div class="cards">
+  <div class="card">
+    <h3><i class="fa-solid fa-credit-card"></i> Nasiya mijozlar</h3>
+    <p id="debtCount">0 ta</p>
+  </div>
+
+  <div class="card">
+    <h3><i class="fa-solid fa-coins"></i> Umumiy nasiya</h3>
+    <p id="debtTotal">0 so‘m</p>
+  </div>
+
+  <!-- ROW 3 -->
   <div class="card">
     <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
     <p id="weekData">...</p>
@@ -190,13 +170,13 @@ body{
   + Mahsulot qo‘shish
 </button>
 
-  <button class="analytics-btn" onclick="location.href='analytics.html'">
-    📊 Tahlil
-  </button>
+<button class="analytics-btn" onclick="location.href='analytics.html'">
+  📊 Tahlil
+</button>
 
-  <button class="list" onclick="location.href='sales.html'">
-    📋 Sotuvlar ro‘yxati
-  </button>
+<button class="list" onclick="location.href='sales.html'">
+  📋 Sotuvlar ro‘yxati
+</button>
 </div>
 
 <div class="bottom-nav">
@@ -205,7 +185,6 @@ body{
   <div onclick="location.href='sales.html'">📊</div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -240,6 +219,7 @@ const weekStart=new Date(today);weekStart.setDate(today.getDate()-6);
 const monthStart=new Date(today);monthStart.setDate(1);
 
 let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
+let debtCount=0,debtTotal=0;
 const productCount={};
 
 db.collection("users").doc(uid).collection("sales").get()
@@ -266,6 +246,22 @@ document.getElementById("monthData").innerText=mC+" dona / "+mS+" so‘m";
 const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
 document.getElementById("topProduct").innerText=
 top?top[0]+" ("+top[1]+" marta)":"—";
+});
+
+/* LOAD NASIYA */
+db.collection("users").doc(uid).collection("debts").get()
+.then(snapshot=>{
+snapshot.forEach(doc=>{
+const d=doc.data();
+if(d.totalDebt>0){
+debtCount++;
+debtTotal+=d.totalDebt;
+}
+});
+
+document.getElementById("debtCount").innerText=debtCount+" ta";
+document.getElementById("debtTotal").innerText=
+debtTotal.toLocaleString()+" so‘m";
 });
 }
 </script>
