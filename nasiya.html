@@ -64,16 +64,14 @@ button{
 
 <script>
 
-<script>
 const firebaseConfig={
-apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-authDomain:"spare-shop-web.firebaseapp.com",
-projectId:"spare-shop-web",
-storageBucket:"spare-shop-web.firebasestorage.app",
-messagingSenderId:"960113811021",
-appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
-
 
 firebase.initializeApp(firebaseConfig);
 
@@ -92,6 +90,11 @@ auth.onAuthStateChanged(user=>{
 
 async function saveDebt(){
 
+  if(!currentUID){
+    alert("User not ready. Refresh page.");
+    return;
+  }
+
   const spareName = document.getElementById("spareName").value.trim();
   const price = Number(document.getElementById("price").value);
   const customerName = document.getElementById("customerName").value.trim();
@@ -107,28 +110,34 @@ async function saveDebt(){
     .collection("debts")
     .doc(customerName);
 
-  const doc = await debtRef.get();
+  try {
 
-  if(doc.exists){
-    // ✅ Combine automatically
-    await debtRef.update({
-      totalDebt: firebase.firestore.FieldValue.increment(price),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } else {
-    // ✅ Create new
-    await debtRef.set({
-      totalDebt: price,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const doc = await debtRef.get();
+
+    if(doc.exists){
+      await debtRef.update({
+        totalDebt: firebase.firestore.FieldValue.increment(price),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await debtRef.set({
+        totalDebt: price,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    alert("Nasiya saqlandi ✅");
+
+    document.getElementById("spareName").value="";
+    document.getElementById("price").value="";
+    document.getElementById("customerName").value="";
+
+  } catch(error){
+    console.error(error);
+    alert("Xatolik yuz berdi");
   }
 
-  alert("Nasiya saqlandi ✅");
-
-  document.getElementById("spareName").value="";
-  document.getElementById("price").value="";
-  document.getElementById("customerName").value="";
 }
 
 </script>
