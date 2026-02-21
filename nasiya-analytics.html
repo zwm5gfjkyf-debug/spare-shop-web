@@ -219,13 +219,23 @@ async function payDebt(customerName){
   const currentDebt = doc.data().totalDebt || 0;
   const newDebt = currentDebt - amount;
 
-  // 1️⃣ Save payment history
+  /* 1️⃣ Save payment history */
   await debtRef.collection("payments").add({
     amount: amount,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // 2️⃣ Update debt
+  /* 2️⃣ Add to today's income (VERY IMPORTANT) */
+  await db.collection("users")
+    .doc(uid)
+    .collection("sales")
+    .add({
+      name: "Nasiya to‘lov (" + customerName + ")",
+      price: amount,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+  /* 3️⃣ Update or delete debt */
   if(newDebt <= 0){
     await debtRef.delete();
   } else {
@@ -237,7 +247,6 @@ async function payDebt(customerName){
 
   location.reload();
 }
-
 /* 📜 VIEW PAYMENT HISTORY */
 async function viewPayments(customerName){
 
