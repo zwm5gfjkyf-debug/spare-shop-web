@@ -59,6 +59,26 @@ h2{
   margin:0 0 8px;
 }
 
+.customer button{
+  margin-top:8px;
+  margin-right:8px;
+  padding:8px 14px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.pay-btn{
+  background:#16a34a;
+  color:white;
+}
+
+.history-btn{
+  background:#2563eb;
+  color:white;
+}
+
 .back-btn{
   margin-top:25px;
   width:100%;
@@ -133,6 +153,10 @@ function loadNasiya(uid){
     .get()
     .then(snapshot=>{
 
+      if(snapshot.empty){
+        list.innerHTML = "<p>Nasiya yo‘q</p>";
+      }
+
       snapshot.forEach(doc=>{
 
         const data = doc.data();
@@ -147,9 +171,11 @@ function loadNasiya(uid){
         const div = document.createElement("div");
         div.className = "customer";
         div.innerHTML = `
-          <h4>${name}</h4>
+          <h4>👤 ${name}</h4>
           <p>📦 Tovar: ${items} ta</p>
           <p>💰 Qarzi: ${debt.toLocaleString()} so‘m</p>
+          <button class="pay-btn" onclick="payDebt('${name}')">💸 To‘landi</button>
+          <button class="history-btn" onclick="viewPayments('${name}')">📜 Tarix</button>
         `;
 
         list.appendChild(div);
@@ -164,6 +190,85 @@ function loadNasiya(uid){
 
     });
 
+}
+
+/* 💸 PROFESSIONAL PAYMENT SYSTEM */
+async function payDebt(customerName){
+
+  const amount = Number(prompt("Qancha to‘landi?"));
+
+  if(!amount || amount <= 0){
+    alert("To‘g‘ri summa kiriting");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const uid = user.uid;
+
+  const debtRef = db
+    .collection("users")
+    .doc(uid)
+    .collection("debts")
+    .doc(customerName);
+
+  const doc = await debtRef.get();
+  if(!doc.exists) return;
+
+  const currentDebt = doc.data().totalDebt || 0;
+  const newDebt = currentDebt - amount;
+
+  // 1️⃣ Save payment history
+  await debtRef.collection("payments").add({
+    amount: amount,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  // 2️⃣ Update debt
+  if(newDebt <= 0){
+    await debtRef.delete();
+  } else {
+    await debtRef.update({
+      totalDebt: newDebt,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  location.reload();
+}
+
+/* 📜 VIEW PAYMENT HISTORY */
+async function viewPayments(customerName){
+
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const uid = user.uid;
+
+  const snap = await db
+    .collection("users")
+    .doc(uid)
+    .collection("debts")
+    .doc(customerName)
+    .collection("payments")
+    .orderBy("createdAt","desc")
+    .get();
+
+  if(snap.empty){
+    alert("To‘lovlar yo‘q");
+    return;
+  }
+
+  let text = "To‘lovlar:\n\n";
+
+  snap.forEach(doc=>{
+    const p = doc.data();
+    const amount = p.amount || 0;
+    text += amount.toLocaleString() + " so‘m\n";
+  });
+
+  alert(text);
 }
 
 </script>
