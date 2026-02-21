@@ -55,27 +55,32 @@ h2{
   margin-bottom:15px;
 }
 
-.customer h4{
-  margin:0 0 8px;
+.section-title{
+  margin-top:12px;
+  font-size:13px;
+  opacity:0.7;
 }
 
-.customer button{
-  margin-top:8px;
-  margin-right:8px;
+.item-line{
+  font-size:13px;
+  opacity:0.9;
+  margin:4px 0;
+}
+
+.payment-line{
+  font-size:13px;
+  color:#22c55e;
+  margin:4px 0;
+}
+
+.pay-btn{
+  margin-top:12px;
   padding:8px 14px;
   border:none;
   border-radius:10px;
   cursor:pointer;
   font-size:14px;
-}
-
-.pay-btn{
   background:#16a34a;
-  color:white;
-}
-
-.history-btn{
-  background:#2563eb;
   color:white;
 }
 
@@ -157,28 +162,82 @@ function loadNasiya(uid){
         list.innerHTML = "<p>Nasiya yo‘q</p>";
       }
 
-      snapshot.forEach(doc=>{
+      snapshot.forEach(async doc=>{
 
         const data = doc.data();
         const name = doc.id;
 
         const debt = Number(data.totalDebt || 0);
-        const items = Number(data.totalItems || 0);
+        const itemsCount = Number(data.totalItems || 0);
 
         totalDebt += debt;
-        totalItems += items;
+        totalItems += itemsCount;
 
         const div = document.createElement("div");
         div.className = "customer";
+
         div.innerHTML = `
           <h4>👤 ${name}</h4>
-          <p>📦 Tovar: ${items} ta</p>
+          <p>📦 Tovar: ${itemsCount} ta</p>
           <p>💰 Qarzi: ${debt.toLocaleString()} so‘m</p>
+          <div class="section-title">🛒 Olingan mahsulotlar:</div>
+          <div id="items-${name}"></div>
+          <div class="section-title">💸 To‘lovlar:</div>
+          <div id="payments-${name}"></div>
           <button class="pay-btn" onclick="payDebt('${name}')">💸 To‘landi</button>
-          <button class="history-btn" onclick="viewPayments('${name}')">📜 Tarix</button>
         `;
 
         list.appendChild(div);
+
+        /* LOAD ITEMS */
+        const itemsSnap = await db
+          .collection("users")
+          .doc(uid)
+          .collection("debts")
+          .doc(name)
+          .collection("items")
+          .orderBy("createdAt","desc")
+          .get();
+
+        const itemsContainer = document.getElementById("items-"+name);
+
+        itemsSnap.forEach(itemDoc=>{
+          const item = itemDoc.data();
+          const date = item.createdAt
+            ? item.createdAt.toDate().toLocaleString("uz-UZ")
+            : "";
+          itemsContainer.innerHTML += `
+            <div class="item-line">
+              • ${item.spareName} - ${item.price.toLocaleString()} so‘m 
+              <span style="opacity:0.6;">(${date})</span>
+            </div>
+          `;
+        });
+
+        /* LOAD PAYMENTS */
+        const paySnap = await db
+          .collection("users")
+          .doc(uid)
+          .collection("debts")
+          .doc(name)
+          .collection("payments")
+          .orderBy("createdAt","desc")
+          .get();
+
+        const payContainer = document.getElementById("payments-"+name);
+
+        paySnap.forEach(payDoc=>{
+          const p = payDoc.data();
+          const date = p.createdAt
+            ? p.createdAt.toDate().toLocaleString("uz-UZ")
+            : "";
+          payContainer.innerHTML += `
+            <div class="payment-line">
+              • ${p.amount.toLocaleString()} so‘m 
+              <span style="opacity:0.6;">(${date})</span>
+            </div>
+          `;
+        });
 
       });
 
@@ -189,10 +248,9 @@ function loadNasiya(uid){
         totalItems+" ta";
 
     });
-
 }
 
-/* 💸 PROFESSIONAL PAYMENT SYSTEM */
+/* PAYMENT SYSTEM */
 async function payDebt(customerName){
 
   const amount = Number(prompt("Qancha to‘landi?"));
@@ -219,24 +277,21 @@ async function payDebt(customerName){
   const currentDebt = doc.data().totalDebt || 0;
   const newDebt = currentDebt - amount;
 
-  /* 1️⃣ Save payment history */
   await debtRef.collection("payments").add({
     amount: amount,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  /* 2️⃣ Add to today's income (VERY IMPORTANT) */
-await db.collection("users")
-  .doc(uid)
-  .collection("sales")
-  .add({
-    name: "Nasiya to‘lov (" + customerName + ")",
-    price: amount,
-    type: "payment", // 🔥 important
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  await db.collection("users")
+    .doc(uid)
+    .collection("sales")
+    .add({
+      name: "Nasiya to‘lov (" + customerName + ")",
+      price: amount,
+      type: "payment",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-  /* 3️⃣ Update or delete debt */
   if(newDebt <= 0){
     await debtRef.delete();
   } else {
@@ -247,38 +302,6 @@ await db.collection("users")
   }
 
   location.reload();
-}
-/* 📜 VIEW PAYMENT HISTORY */
-async function viewPayments(customerName){
-
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const uid = user.uid;
-
-  const snap = await db
-    .collection("users")
-    .doc(uid)
-    .collection("debts")
-    .doc(customerName)
-    .collection("payments")
-    .orderBy("createdAt","desc")
-    .get();
-
-  if(snap.empty){
-    alert("To‘lovlar yo‘q");
-    return;
-  }
-
-  let text = "To‘lovlar:\n\n";
-
-  snap.forEach(doc=>{
-    const p = doc.data();
-    const amount = p.amount || 0;
-    text += amount.toLocaleString() + " so‘m\n";
-  });
-
-  alert(text);
 }
 
 </script>
