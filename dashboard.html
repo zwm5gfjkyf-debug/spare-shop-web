@@ -251,7 +251,13 @@ db.collection("users").doc(uid).collection("sales").get()
 
       productCount[s.name]=(productCount[s.name]||0)+1;
 
-      if(d.getTime()===today.getTime()){tC++;tS+=s.price;}
+     if(d.getTime()===today.getTime()){
+    tS += s.price;
+
+    if(s.type === "product"){
+        tC++;
+    }
+}
       if(d>=weekStart){wC++;wS+=s.price;}
       if(d>=monthStart){mC++;mS+=s.price;}
     });
