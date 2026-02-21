@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Nasiya savdo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  padding:20px;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin-bottom:18px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
+}
+
+button{
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:16px;
+  font-size:17px;
+  font-weight:600;
+  background:linear-gradient(90deg,#f59e0b,#ef4444);
+  color:white;
+  cursor:pointer;
+}
+
+.back{
+  margin-top:20px;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+}
+</style>
+</head>
+
+<body>
+
+<h2>💳 Nasiya savdo</h2>
+
+<input type="text" id="spareName" placeholder="Mahsulot nomi">
+<input type="number" id="price" placeholder="Narxi">
+<input type="text" id="customerName" placeholder="Mijoz ismi">
+
+<button onclick="saveDebt()">Saqlash</button>
+<button class="back" onclick="location.href='dashboard.html'">← Orqaga</button>
+
+<script>
+
+const firebaseConfig = {
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_AUTH_DOMAIN",
+  projectId:"spare-shop-web",
+  storageBucket:"YOUR_STORAGE",
+  messagingSenderId:"YOUR_SENDER_ID",
+  appId:"YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    location.href="index.html";
+    return;
+  }
+  window.currentUID = user.uid;
+});
+
+async function saveDebt(){
+
+  const spareName = document.getElementById("spareName").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const customerName = document.getElementById("customerName").value.trim();
+
+  if(!spareName || !price || !customerName){
+    alert("Barcha maydonlarni to‘ldiring");
+    return;
+  }
+
+  const debtRef = db
+    .collection("users")
+    .doc(currentUID)
+    .collection("debts")
+    .doc(customerName);
+
+  const doc = await debtRef.get();
+
+  if(doc.exists){
+    // ✅ Combine automatically
+    await debtRef.update({
+      totalDebt: firebase.firestore.FieldValue.increment(price),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } else {
+    // ✅ Create new
+    await debtRef.set({
+      totalDebt: price,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  alert("Nasiya saqlandi ✅");
+
+  document.getElementById("spareName").value="";
+  document.getElementById("price").value="";
+  document.getElementById("customerName").value="";
+}
+
+</script>
+
+</body>
+</html>
