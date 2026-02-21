@@ -13,9 +13,20 @@
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:white;
-  padding:20px;
+  background:#f3f4f6;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:white;
+  padding:40px;
+  border-radius:30px;
+  width:100%;
+  max-width:450px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.15);
 }
 
 h2{
@@ -23,44 +34,61 @@ h2{
   margin-bottom:30px;
 }
 
+label{
+  font-weight:600;
+}
+
 input{
   width:100%;
-  padding:14px;
-  margin-bottom:18px;
-  border-radius:12px;
-  border:none;
+  padding:16px;
+  margin:10px 0 20px;
+  border-radius:18px;
+  border:1px solid #ddd;
   font-size:16px;
 }
 
 button{
   width:100%;
-  padding:16px;
+  padding:18px;
   border:none;
-  border-radius:16px;
-  font-size:17px;
+  border-radius:20px;
+  font-size:18px;
   font-weight:600;
-  background:linear-gradient(90deg,#f59e0b,#ef4444);
-  color:white;
   cursor:pointer;
 }
 
+.save{
+  background:#16a34a;
+  color:white;
+  margin-bottom:15px;
+}
+
 .back{
-  margin-top:20px;
-  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  background:#2563eb;
+  color:white;
 }
 </style>
 </head>
 
 <body>
 
+<div class="card">
+
 <h2>💳 Nasiya savdo</h2>
 
-<input type="text" id="spareName" placeholder="Mahsulot nomi">
-<input type="number" id="price" placeholder="Narxi">
-<input type="text" id="customerName" placeholder="Mijoz ismi">
+<label>Mahsulot nomi</label>
+<input type="text" id="spareName" placeholder="Masalan: Motor">
 
-<button onclick="saveDebt()">Saqlash</button>
+<label>Narxi (so‘m)</label>
+<input type="number" id="price" placeholder="Masalan: 20000">
+
+<label>Mijoz ismi</label>
+<input type="text" id="customerName" placeholder="Masalan: Bobur">
+
+<button class="save" onclick="saveDebt()">Saqlash</button>
 <button class="back" onclick="location.href='dashboard.html'">← Orqaga</button>
+
+</div>
 
 <script>
 
@@ -78,49 +106,45 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUID = null;
+let currentUID=null;
 
-/* AUTH */
 auth.onAuthStateChanged(user=>{
   if(!user){
-    window.location.href="index.html";
+    location.href="index.html";
     return;
   }
-  currentUID = user.uid;
+  currentUID=user.uid;
 });
 
-/* SAVE NASIYA */
 async function saveDebt(){
 
-  if(!currentUID){
-    return;
-  }
+  if(!currentUID) return;
 
-  const spareName = document.getElementById("spareName").value.trim();
-  const price = Number(document.getElementById("price").value);
-  const customerName = document.getElementById("customerName").value.trim();
+  const spareName=document.getElementById("spareName").value.trim();
+  const price=Number(document.getElementById("price").value);
+  const customerName=document.getElementById("customerName").value.trim();
 
   if(!spareName || !price || !customerName){
     alert("Barcha maydonlarni to‘ldiring");
     return;
   }
 
-  const debtRef = db
+  const debtRef=db
     .collection("users")
     .doc(currentUID)
     .collection("debts")
     .doc(customerName);
 
-  try {
+  try{
 
-    const doc = await debtRef.get();
+    const doc=await debtRef.get();
 
     if(doc.exists){
       await debtRef.update({
         totalDebt: firebase.firestore.FieldValue.increment(price),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-    } else {
+    }else{
       await debtRef.set({
         totalDebt: price,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -128,14 +152,13 @@ async function saveDebt(){
       });
     }
 
-    /* 🔥 IMPORTANT: redirect instantly like naqd savdo */
-    window.location.href = "dashboard.html";
+    /* 🔥 INSTANT REDIRECT */
+    location.href="dashboard.html";
 
-  } catch(error){
+  }catch(error){
     console.error(error);
     alert("Xatolik yuz berdi");
   }
-
 }
 
 </script>
