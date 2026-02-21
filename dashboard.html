@@ -66,10 +66,7 @@ body{
   font-size:15px;
   opacity:0.8;
 }
-.reset-btn{
-  background:linear-gradient(90deg,#ef4444,#dc2626);
-  color:white;
-}
+
 .card p{
   margin:0;
   font-size:16px;
@@ -169,16 +166,6 @@ body{
 </div>
 
 <div class="actions">
-
-
-
-  
-  <button class="reset-btn" onclick="resetAllData()">
-🗑 Reset All Data
-</button>
-
-
-
   
 <button onclick="location.href='add-type.html'">
   + Mahsulot qo‘shish
@@ -310,40 +297,5 @@ db.collection("users").doc(uid).collection("debts").get()
 });
 
 }
-
-
-/* ===== RESET FUNCTION ===== */
-async function resetAllData(){
-
-  const confirmReset = confirm("Barcha ma'lumotlar o‘chiriladi! Davom etasizmi?");
-  if(!confirmReset) return;
-
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const uid = user.uid;
-
-  try{
-
-    // DELETE SALES
-    const salesSnap = await db.collection("users").doc(uid).collection("sales").get();
-    const salesBatch = db.batch();
-    salesSnap.forEach(doc=> salesBatch.delete(doc.ref));
-    await salesBatch.commit();
-
-    // DELETE DEBTS
-    const debtSnap = await db.collection("users").doc(uid).collection("debts").get();
-    const debtBatch = db.batch();
-    debtSnap.forEach(doc=> debtBatch.delete(doc.ref));
-    await debtBatch.commit();
-
-    alert("Barcha ma'lumotlar o‘chirildi ✅");
-    location.reload();
-
-  }catch(error){
-    console.error(error);
-    alert("Xatolik yuz berdi");
-  }
-}
-
+  
 </script>
