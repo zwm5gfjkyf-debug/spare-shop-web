@@ -161,19 +161,20 @@ async function saveDebt(){
     /* 1️⃣ UPDATE DEBT TOTAL */
     const doc=await debtRef.get();
 
-    if(doc.exists){
-      await debtRef.update({
-        totalDebt: firebase.firestore.FieldValue.increment(price),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }else{
-      await debtRef.set({
-        totalDebt: price,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    }
-
+   if(doc.exists){
+  await debtRef.update({
+    totalDebt: firebase.firestore.FieldValue.increment(price),
+    totalItems: firebase.firestore.FieldValue.increment(1), // ✅ ADD THIS
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}else{
+  await debtRef.set({
+    totalDebt: price,
+    totalItems: 1, // ✅ ADD THIS
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
     /* 2️⃣ SAVE NASIYA PRODUCT (VERY IMPORTANT) */
     await db
       .collection("users")
