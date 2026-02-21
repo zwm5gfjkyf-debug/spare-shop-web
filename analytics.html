@@ -178,12 +178,12 @@ function loadAnalytics(uid){
         const sale = doc.data();
         if(!sale.createdAt) return;
 
-        totalRevenue += sale.price;
+totalRevenue += Number(sale.price);
         totalItems++;
 
         productCount[sale.name] = (productCount[sale.name]||0)+1;
 
-        sum += sale.price;
+sum += Number(sale.price);
         cumulative.push(sum);
         labels.push(index+1);
       });
