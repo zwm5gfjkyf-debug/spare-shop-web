@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+  
 body{
   margin:0;
   font-family:'Segoe UI', Arial, sans-serif;
@@ -137,7 +138,21 @@ body{
 </head>
 
 <body>
-
+<div id="authLoading" style="
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:#0f172a;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:20px;
+z-index:9999;">
+Loading...
+</div>
 <div class="header">Spare Shop</div>
 
 <!-- ROW 1 -->
@@ -227,13 +242,24 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
+/* ========================= */
+/* ===== AUTH CHECK ======== */
+/* ========================= */
+
 auth.onAuthStateChanged(user=>{
-if(!user){
-window.location.href="index.html";
-return;
-}
-loadDashboard(user.uid);
+
+  const loader = document.getElementById("authLoading");
+
+  if(!user){
+    window.location.href="index.html";
+    return;
+  }
+
+  loader.style.display="none"; // 🔥 hide loading overlay
+  loadDashboard(user.uid);
+
 });
+
 
 function loadDashboard(uid){
 
@@ -300,7 +326,9 @@ db.collection("users")
     const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById("topProduct").innerText=
       top?top[0]+" ("+top[1]+" marta)":"—";
-removeSkeleton();
+
+    removeSkeleton(); // 🔥 remove skeleton only after data loads
+
 });
 
 
@@ -329,10 +357,17 @@ db.collection("users")
 });
 
 }
+
+
+/* ========================= */
+/* ===== REMOVE SKELETON ==== */
+/* ========================= */
+
 function removeSkeleton(){
   const elements = document.querySelectorAll(".skeleton");
   elements.forEach(el=>{
     el.classList.remove("skeleton");
   });
 }
+
 </script>
