@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-  
 body{
   margin:0;
   font-family:'Segoe UI', Arial, sans-serif;
@@ -18,8 +17,10 @@ body{
   padding:20px;
   padding-bottom:110px;
   min-height:100vh;
+  display:none; /* 🔥 hide page until auth ready */
 }
-/* ===== Skeleton Loader ===== */
+
+/* Skeleton */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -32,194 +33,73 @@ body{
   border-radius: 6px;
   color: transparent;
 }
-
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-.header{
-  font-size:22px;
-  font-weight:600;
-  margin-bottom:25px;
-}
 
-.top{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-}
+.header{font-size:22px;font-weight:600;margin-bottom:25px;}
+.top{display:flex;gap:15px;flex-wrap:wrap;}
+.big{flex:1;min-width:260px;padding:22px;border-radius:20px;background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,0.35);}
+.big h1{margin:12px 0 0;font-size:34px;}
 
-.big{
-  flex:1;
-  min-width:260px;
-  padding:22px;
-  border-radius:20px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.35);
-  transition:0.2s;
-}
+.cards{margin-top:25px;display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+.card{background:rgba(255,255,255,0.07);padding:18px;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.card h3{margin:0 0 8px;font-size:15px;opacity:0.8;}
+.card p{margin:0;font-size:16px;font-weight:600;}
 
-.big h1{
-  margin:12px 0 0;
-  font-size:34px;
-}
-
-.cards{
-  margin-top:25px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-}
-
-.card{
-  background:rgba(255,255,255,0.07);
-  padding:18px;
-  border-radius:18px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.3);
-}
-
-.card h3{
-  margin:0 0 8px;
-  font-size:15px;
-  opacity:0.8;
-}
-
-.card p{
-  margin:0;
-  font-size:16px;
-  font-weight:600;
-}
-
-.actions{
-  margin-top:35px;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-
-.actions button{
-  padding:18px;
-  border:none;
-  border-radius:20px;
-  font-size:18px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.add{
-  background:linear-gradient(90deg,#22c55e,#16a34a);
-  color:white;
-}
-
-.analytics-btn{
-  background:linear-gradient(90deg,#06b6d4,#3b82f6);
-  color:white;
-}
-
-.list{
-  background:linear-gradient(90deg,#3b82f6,#2563eb);
-  color:white;
-}
+.actions{margin-top:35px;display:flex;flex-direction:column;gap:18px;}
+.actions button{padding:18px;border:none;border-radius:20px;font-size:18px;font-weight:600;cursor:pointer;}
 
 .bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:65px;
-  background:#0f172a;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  border-top:1px solid rgba(255,255,255,0.1);
+  position:fixed;bottom:0;left:0;right:0;height:65px;
+  background:#0f172a;display:flex;justify-content:space-around;
+  align-items:center;border-top:1px solid rgba(255,255,255,0.1);
 }
 </style>
 </head>
 
 <body>
-<div id="authLoading" style="
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-background:#0f172a;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-font-size:20px;
-z-index:9999;">
-Loading...
-</div>
+
 <div class="header">Spare Shop</div>
 
-<!-- ROW 1 -->
 <div class="top">
   <div class="big">
-    <div><i class="fa-solid fa-box-open"></i> Bugun sotildi</div>
-   <h1 id="todayCount" class="skeleton">000000</h1>
+    <div>Bugun sotildi</div>
+    <h1 id="todayCount" class="skeleton">000</h1>
   </div>
 
   <div class="big">
-    <div><i class="fa-solid fa-money-bill-wave"></i> Bugungi tushum</div>
- <h1 id="todayTotal" class="skeleton">000000</h1>
+    <div>Bugungi tushum</div>
+    <h1 id="todayTotal" class="skeleton">000</h1>
   </div>
 </div>
 
-<!-- ROW 2 (NASIYA) -->
 <div class="cards">
   <div class="card">
-    <h3><i class="fa-solid fa-credit-card"></i> Nasiya tovar</h3>
-  <p id="debtCount" class="skeleton">000000</p>
+    <h3>Nasiya tovar</h3>
+    <p id="debtCount" class="skeleton">000</p>
   </div>
 
   <div class="card">
-    <h3><i class="fa-solid fa-coins"></i> Umumiy nasiya</h3>
- <p id="debtTotal" class="skeleton">000000</p>
-  </div>
-
-  <!-- ROW 3 -->
-  <div class="card">
-    <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
-  <p id="weekData" class="skeleton">000000</p>
+    <h3>Umumiy nasiya</h3>
+    <p id="debtTotal" class="skeleton">000</p>
   </div>
 
   <div class="card">
-    <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
-  <p id="monthData" class="skeleton">000000</p>
+    <h3>Bu hafta</h3>
+    <p id="weekData" class="skeleton">000</p>
   </div>
 
   <div class="card">
-    <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
-  <p id="topProduct" class="skeleton">000000</p>
+    <h3>Bu oy</h3>
+    <p id="monthData" class="skeleton">000</p>
   </div>
-</div>
 
-<div class="actions">
-  
-<button onclick="location.href='add-type.html'">
-  + Mahsulot qo‘shish
-</button>
-
-<button class="analytics-btn" onclick="location.href='analytics.html'">
-  📊 Tahlil
-</button>
-  
-<button class="analytics-btn" onclick="location.href='nasiya-analytics.html'">
-💳 Nasiya Tahlil
-</button>
-  
-<button class="list" onclick="location.href='sales.html'">
-  📋 Sotuvlar ro‘yxati
-</button>
-</div>
-
-<div class="bottom-nav">
-  <div onclick="location.href='dashboard.html'">🏠</div>
-  <div onclick="location.href='add.html'">➕</div>
-  <div onclick="location.href='sales.html'">📊</div>
+  <div class="card">
+    <h3>Eng ko‘p sotilgan</h3>
+    <p id="topProduct" class="skeleton">000</p>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -238,120 +118,105 @@ const firebaseConfig={
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-const loader = document.getElementById("loader");
-
 /* ================= AUTH ================= */
 
-firebase.auth().onAuthStateChanged(function(user) {
-
-  if (user) {
-    if(loader) loader.style.display = "none";
-    loadDashboard(user.uid);
-  } else {
-    window.location.href = "login.html";
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    window.location.href="index.html";
+    return;
   }
 
+  document.body.style.display="block"; // 🔥 show page only after auth
+  loadDashboard(user.uid);
 });
 
 /* ================= DASHBOARD ================= */
 
 function loadDashboard(uid){
 
-  /* SALES */
-  db.collection("users")
-    .doc(uid)
-    .collection("sales")
-    .onSnapshot(snapshot=>{
+  const todayStart=new Date();
+  todayStart.setHours(0,0,0,0);
 
-      let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
-      const productCount={};
+  const tomorrowStart=new Date(todayStart);
+  tomorrowStart.setDate(todayStart.getDate()+1);
 
-      const todayStart=new Date();
-      todayStart.setHours(0,0,0,0);
+  const weekStart=new Date(todayStart);
+  weekStart.setDate(todayStart.getDate()-6);
 
-      const tomorrowStart=new Date(todayStart);
-      tomorrowStart.setDate(todayStart.getDate()+1);
+  const monthStart=new Date(todayStart);
+  monthStart.setDate(1);
 
-      const weekStart=new Date(todayStart);
-      weekStart.setDate(todayStart.getDate()-6);
+  /* SALES REALTIME */
+  db.collection("users").doc(uid).collection("sales")
+  .onSnapshot(snapshot=>{
 
-      const monthStart=new Date(todayStart);
-      monthStart.setDate(1);
+    let tC=0,tS=0,wC=0,wS=0,mC=0,mS=0;
+    const productCount={};
 
-      snapshot.forEach(doc=>{
-        const s=doc.data();
-        if(!s.createdAt) return;
+    snapshot.forEach(doc=>{
+      const s=doc.data();
+      if(!s.createdAt) return;
 
-        const createdDate=s.createdAt.toDate();
-        const price=Number(s.price||0);
+      const d=s.createdAt.toDate();
+      const price=Number(s.price||0);
 
-        if(createdDate>=todayStart && createdDate<tomorrowStart){
-          tS+=price;
-          if(!s.type || s.type==="product"){ tC++; }
-        }
+      if(d>=todayStart && d<tomorrowStart){
+        tS+=price;
+        if(!s.type || s.type==="product") tC++;
+      }
 
-        if(createdDate>=weekStart){
-          wS+=price;
-          if(!s.type || s.type==="product"){ wC++; }
-        }
+      if(d>=weekStart){
+        wS+=price;
+        if(!s.type || s.type==="product") wC++;
+      }
 
-        if(createdDate>=monthStart){
-          mS+=price;
-          if(!s.type || s.type==="product"){ mC++; }
-        }
+      if(d>=monthStart){
+        mS+=price;
+        if(!s.type || s.type==="product") mC++;
+      }
 
-        if(!s.type || s.type==="product"){
-          productCount[s.name]=(productCount[s.name]||0)+1;
-        }
-      });
+      if(!s.type || s.type==="product"){
+        productCount[s.name]=(productCount[s.name]||0)+1;
+      }
+    });
 
-      document.getElementById("todayCount").innerText=tC+" dona";
-      document.getElementById("todayTotal").innerText=tS.toLocaleString()+" so‘m";
-      document.getElementById("weekData").innerText=wC+" dona / "+wS.toLocaleString()+" so‘m";
-      document.getElementById("monthData").innerText=mC+" dona / "+mS.toLocaleString()+" so‘m";
+    updateUI("todayCount", tC+" dona");
+    updateUI("todayTotal", tS.toLocaleString()+" so‘m");
+    updateUI("weekData", wC+" dona / "+wS.toLocaleString()+" so‘m");
+    updateUI("monthData", mC+" dona / "+mS.toLocaleString()+" so‘m");
 
-      const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
-      document.getElementById("topProduct").innerText=
-        top?top[0]+" ("+top[1]+" marta)":"—";
-
-      removeSkeleton();
+    const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
+    updateUI("topProduct", top?top[0]+" ("+top[1]+" marta)":"—");
 
   });
 
-  /* NASIYA */
-  db.collection("users")
-    .doc(uid)
-    .collection("debts")
-    .onSnapshot(snapshot=>{
+  /* NASIYA REALTIME */
+  db.collection("users").doc(uid).collection("debts")
+  .onSnapshot(snapshot=>{
 
-      let nasiyaCount=0;
-      let nasiyaTotal=0;
+    let count=0,total=0;
 
-      snapshot.forEach(doc=>{
-        const d=doc.data();
-        nasiyaCount+=Number(d.totalItems||0);
-        nasiyaTotal+=Number(d.totalDebt||0);
-      });
+    snapshot.forEach(doc=>{
+      const d=doc.data();
+      count+=Number(d.totalItems||0);
+      total+=Number(d.totalDebt||0);
+    });
 
-      document.getElementById("debtCount").innerText=nasiyaCount+" ta";
-      document.getElementById("debtTotal").innerText=
-        nasiyaTotal.toLocaleString()+" so‘m";
-
+    updateUI("debtCount", count+" ta");
+    updateUI("debtTotal", total.toLocaleString()+" so‘m");
   });
-
 }
 
-/* ================= SKELETON ================= */
-
-function removeSkeleton(){
-  const elements = document.querySelectorAll(".skeleton");
-  elements.forEach(el=>{
-    el.classList.remove("skeleton");
-  });
+/* Remove skeleton safely */
+function updateUI(id,value){
+  const el=document.getElementById(id);
+  el.innerText=value;
+  el.classList.remove("skeleton");
 }
 
 </script>
+</body>
+</html>
