@@ -4,7 +4,8 @@
   <link rel="manifest" href="/manifest.json">
   <meta charset="UTF-8" />
   <title>Kirish</title>
- 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
       margin: 0;
@@ -14,6 +15,22 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+    }
+
+    /* 🔥 Loading Overlay */
+    #authLoading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
+      z-index: 9999;
     }
 
     .box {
@@ -66,22 +83,27 @@
       color: #555;
     }
   </style>
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 </head>
+
 <body>
 
-<div class="box">
-  <h2>Kirish / Ro‘yxatdan o‘tish</h2>
+<!-- 🔥 Loading Screen -->
+<div id="authLoading">Loading...</div>
 
-  <input id="email" type="email" placeholder="Email (login)">
-  <input id="password" type="password" placeholder="Parol (kamida 6 belgi)">
+<!-- 🔥 Login Box (Hidden Initially) -->
+<div id="loginBox" style="display:none;">
+  <div class="box">
+    <h2>Kirish / Ro‘yxatdan o‘tish</h2>
 
-  <button class="login" onclick="login()">Kirish</button>
-  <button class="register" onclick="register()">Ro‘yxatdan o‘tish</button>
+    <input id="email" type="email" placeholder="Email (login)">
+    <input id="password" type="password" placeholder="Parol (kamida 6 belgi)">
 
-  <div class="note">
-    Bir marta ro‘yxatdan o‘ting — keyin har doim shu hisob bilan kirasiz
+    <button class="login" onclick="login()">Kirish</button>
+    <button class="register" onclick="register()">Ro‘yxatdan o‘tish</button>
+
+    <div class="note">
+      Bir marta ro‘yxatdan o‘ting — keyin har doim shu hisob bilan kirasiz
+    </div>
   </div>
 </div>
 
@@ -96,67 +118,75 @@ const firebaseConfig = {
   projectId: "spare-shop-web",
   storageBucket: "spare-shop-web.firebasestorage.app",
   messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
+  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+/* 🔥 Professional Auth Check */
+auth.onAuthStateChanged(function(user) {
 
-  // If already logged in → go directly to dashboard
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      window.location.href = "dashboard.html";
-    }
-  });
+  const loader = document.getElementById("authLoading");
+  const loginBox = document.getElementById("loginBox");
 
-  function login() {
-    const e = document.getElementById("email").value.trim();
-    const p = document.getElementById("password").value;
-
-    if (!e || !p) {
-      alert("Email va parolni kiriting");
-      return;
-    }
-
-    auth.signInWithEmailAndPassword(e, p)
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        alert(err.message);
-      });
+  if (user) {
+    window.location.replace("dashboard.html"); // smoother redirect
+  } else {
+    loader.style.display = "none";
+    loginBox.style.display = "block";
   }
 
-  function register() {
-    const e = document.getElementById("email").value.trim();
-    const p = document.getElementById("password").value;
+});
 
-    if (!e || !p) {
-      alert("Email va parolni kiriting");
-      return;
-    }
+/* LOGIN */
+function login() {
+  const e = document.getElementById("email").value.trim();
+  const p = document.getElementById("password").value;
 
-    auth.createUserWithEmailAndPassword(e, p)
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch(err => {
-        alert(err.message);
-      });
+  if (!e || !p) {
+    alert("Email va parolni kiriting");
+    return;
   }
+
+  auth.signInWithEmailAndPassword(e, p)
+    .then(() => {
+      window.location.replace("dashboard.html");
+    })
+    .catch(err => {
+      alert(err.message);
+    });
+}
+
+/* REGISTER */
+function register() {
+  const e = document.getElementById("email").value.trim();
+  const p = document.getElementById("password").value;
+
+  if (!e || !p) {
+    alert("Email va parolni kiriting");
+    return;
+  }
+
+  auth.createUserWithEmailAndPassword(e, p)
+    .then(() => {
+      window.location.replace("dashboard.html");
+    })
+    .catch(err => {
+      alert(err.message);
+    });
+}
 </script>
+
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/service-worker.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.log("SW error:", err));
+      .catch(() => {});
   });
 }
 </script>
-  
+
 </body>
 </html>
