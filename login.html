@@ -6,16 +6,14 @@
 <title>Kirish</title>
 
 <script>
-/* 🔥 INSTANT REDIRECT BEFORE PAGE RENDERS */
-(function() {
-
+/* 🔥 Instant redirect before render */
+(function () {
   const keys = Object.keys(localStorage);
   const firebaseKey = keys.find(k => k.startsWith("firebase:authUser"));
 
   if (firebaseKey && localStorage.getItem(firebaseKey)) {
     window.location.replace("dashboard.html");
   }
-
 })();
 </script>
 
@@ -39,6 +37,39 @@ body {
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   text-align: center;
 }
+
+h2 {
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.login {
+  background: #2563eb;
+  color: white;
+}
+
+.register {
+  background: #16a34a;
+  color: white;
+}
 </style>
 </head>
 
@@ -46,10 +77,12 @@ body {
 
 <div class="box">
   <h2>Kirish / Ro‘yxatdan o‘tish</h2>
+
   <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Parol">
-  <button onclick="login()">Kirish</button>
-  <button onclick="register()">Ro‘yxatdan o‘tish</button>
+  <input id="password" type="password" placeholder="Parol (kamida 6 belgi)">
+
+  <button id="loginBtn" class="login" onclick="login()">Kirish</button>
+  <button id="registerBtn" class="register" onclick="register()">Ro‘yxatdan o‘tish</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -57,31 +90,70 @@ body {
 
 <script>
 const firebaseConfig={
-apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-authDomain:"spare-shop-web.firebaseapp.com",
-projectId:"spare-shop-web",
-storageBucket:"spare-shop-web.firebasestorage.app",
-messagingSenderId:"960113811021",
-appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-firebase.initializeApp(firebaseConfig);
+/* Prevent double init */
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 
+/* Extra safety redirect */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    window.location.replace("dashboard.html");
+  }
+});
+
+/* Disable button during request */
+function disableButtons(state){
+  document.getElementById("loginBtn").disabled = state;
+  document.getElementById("registerBtn").disabled = state;
+}
+
 function login(){
-  const e=document.getElementById("email").value;
+  const e=document.getElementById("email").value.trim();
   const p=document.getElementById("password").value;
+
+  if(!e || !p){
+    alert("Email va parolni kiriting");
+    return;
+  }
+
+  disableButtons(true);
+
   auth.signInWithEmailAndPassword(e,p)
     .then(()=>window.location.replace("dashboard.html"))
-    .catch(err=>alert(err.message));
+    .catch(err=>{
+      alert(err.message);
+      disableButtons(false);
+    });
 }
 
 function register(){
-  const e=document.getElementById("email").value;
+  const e=document.getElementById("email").value.trim();
   const p=document.getElementById("password").value;
+
+  if(!e || !p){
+    alert("Email va parolni kiriting");
+    return;
+  }
+
+  disableButtons(true);
+
   auth.createUserWithEmailAndPassword(e,p)
     .then(()=>window.location.replace("dashboard.html"))
-    .catch(err=>alert(err.message));
+    .catch(err=>{
+      alert(err.message);
+      disableButtons(false);
+    });
 }
 </script>
 
