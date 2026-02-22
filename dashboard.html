@@ -247,17 +247,21 @@ db.collection("users").doc(uid).collection("sales").get()
     const s=doc.data();
     if(!s.createdAt) return;
 
-    const d=s.createdAt.toDate();
-    d.setHours(0,0,0,0);
+  const createdDate = s.createdAt.toDate();
 
-    /* ===== TODAY ===== */
-    if(d.getTime()===today.getTime()){
-      tS += s.price;
+const todayStart = new Date();
+todayStart.setHours(0,0,0,0);
 
-      if(!s.type || s.type === "product"){
+const tomorrowStart = new Date(todayStart);
+tomorrowStart.setDate(todayStart.getDate()+1);
+
+if(createdDate >= todayStart && createdDate < tomorrowStart){
+    tS += Number(s.price || 0);
+
+    if(!s.type || s.type === "product"){
         tC++;
-      }
     }
+}
 
     /* ===== WEEK ===== */
     if(d >= weekStart){
