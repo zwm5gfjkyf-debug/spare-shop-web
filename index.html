@@ -1,190 +1,87 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <link rel="manifest" href="/manifest.json">
-  <meta charset="UTF-8" />
-  <title>Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kirish</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<script>
+/* 🔥 INSTANT REDIRECT BEFORE PAGE RENDERS */
+(function() {
 
-    /* 🔥 Loading Overlay */
-    #authLoading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 20px;
-      z-index: 9999;
-    }
+  const keys = Object.keys(localStorage);
+  const firebaseKey = keys.find(k => k.startsWith("firebase:authUser"));
 
-    .box {
-      background: white;
-      width: 100%;
-      max-width: 360px;
-      padding: 26px;
-      border-radius: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+  if (firebaseKey && localStorage.getItem(firebaseKey)) {
+    window.location.replace("dashboard.html");
+  }
 
-    h2 {
-      margin-top: 0;
-      margin-bottom: 16px;
-    }
+})();
+</script>
 
-    input {
-      width: 100%;
-      padding: 14px;
-      margin-top: 10px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-    button {
-      width: 100%;
-      padding: 16px;
-      margin-top: 14px;
-      font-size: 18px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-    }
-
-    .login {
-      background: #2563eb;
-      color: white;
-    }
-
-    .register {
-      background: #16a34a;
-      color: white;
-    }
-
-    .note {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #555;
-    }
-  </style>
+.box {
+  background: white;
+  width: 100%;
+  max-width: 360px;
+  padding: 26px;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+</style>
 </head>
 
 <body>
 
-<!-- 🔥 Loading Screen -->
-<div id="authLoading">Loading...</div>
-
-<!-- 🔥 Login Box (Hidden Initially) -->
-<div id="loginBox" style="display:none;">
-  <div class="box">
-    <h2>Kirish / Ro‘yxatdan o‘tish</h2>
-
-    <input id="email" type="email" placeholder="Email (login)">
-    <input id="password" type="password" placeholder="Parol (kamida 6 belgi)">
-
-    <button class="login" onclick="login()">Kirish</button>
-    <button class="register" onclick="register()">Ro‘yxatdan o‘tish</button>
-
-    <div class="note">
-      Bir marta ro‘yxatdan o‘ting — keyin har doim shu hisob bilan kirasiz
-    </div>
-  </div>
+<div class="box">
+  <h2>Kirish / Ro‘yxatdan o‘tish</h2>
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Parol">
+  <button onclick="login()">Kirish</button>
+  <button onclick="register()">Ro‘yxatdan o‘tish</button>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain: "spare-shop-web.firebaseapp.com",
-  projectId: "spare-shop-web",
-  storageBucket: "spare-shop-web.firebasestorage.app",
-  messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
+const firebaseConfig={
+apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+authDomain:"spare-shop-web.firebaseapp.com",
+projectId:"spare-shop-web",
+storageBucket:"spare-shop-web.firebasestorage.app",
+messagingSenderId:"960113811021",
+appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-/* 🔥 Professional Auth Check */
-auth.onAuthStateChanged(function(user) {
-
-  const loader = document.getElementById("authLoading");
-  const loginBox = document.getElementById("loginBox");
-
-  if (user) {
-    window.location.replace("dashboard.html"); // smoother redirect
-  } else {
-    loader.style.display = "none";
-    loginBox.style.display = "block";
-  }
-
-});
-
-/* LOGIN */
-function login() {
-  const e = document.getElementById("email").value.trim();
-  const p = document.getElementById("password").value;
-
-  if (!e || !p) {
-    alert("Email va parolni kiriting");
-    return;
-  }
-
-  auth.signInWithEmailAndPassword(e, p)
-    .then(() => {
-      window.location.replace("dashboard.html");
-    })
-    .catch(err => {
-      alert(err.message);
-    });
+function login(){
+  const e=document.getElementById("email").value;
+  const p=document.getElementById("password").value;
+  auth.signInWithEmailAndPassword(e,p)
+    .then(()=>window.location.replace("dashboard.html"))
+    .catch(err=>alert(err.message));
 }
 
-/* REGISTER */
-function register() {
-  const e = document.getElementById("email").value.trim();
-  const p = document.getElementById("password").value;
-
-  if (!e || !p) {
-    alert("Email va parolni kiriting");
-    return;
-  }
-
-  auth.createUserWithEmailAndPassword(e, p)
-    .then(() => {
-      window.location.replace("dashboard.html");
-    })
-    .catch(err => {
-      alert(err.message);
-    });
-}
-</script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .catch(() => {});
-  });
+function register(){
+  const e=document.getElementById("email").value;
+  const p=document.getElementById("password").value;
+  auth.createUserWithEmailAndPassword(e,p)
+    .then(()=>window.location.replace("dashboard.html"))
+    .catch(err=>alert(err.message));
 }
 </script>
 
