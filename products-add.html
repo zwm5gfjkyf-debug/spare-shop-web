@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Yangi tovarlar qo‘shish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#f1f5f9;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  width:100%;
+  max-width:400px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+h2{text-align:center;}
+
+input{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:16px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.save{background:#16a34a;color:white;}
+.back{background:#2563eb;color:white;margin-top:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+<h2>Yangi tovar qo‘shish</h2>
+
+<input id="productName" placeholder="Tovar nomi">
+<input id="productPrice" type="number" placeholder="Narxi (so‘m)">
+
+<button id="saveBtn" class="save" onclick="saveProduct()">Keyingisi</button>
+<button class="back" onclick="goBack()">Orqaga</button>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+
+const firebaseConfig={
+  apiKey:"AIza...",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+};
+
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+let uid=null;
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    window.location.href="index.html";
+    return;
+  }
+  uid=user.uid;
+  document.body.style.display="flex";
+});
+
+async function saveProduct(){
+
+  const btn=document.getElementById("saveBtn");
+  if(btn.disabled) return;
+
+  const name=document.getElementById("productName").value.trim();
+  const price=Number(document.getElementById("productPrice").value);
+
+  if(!name || !price){
+    alert("Iltimos barcha maydonlarni to‘ldiring");
+    return;
+  }
+
+  btn.disabled=true;
+  btn.innerText="Saqlanmoqda...";
+
+  await db.collection("users")
+    .doc(uid)
+    .collection("products")
+    .add({
+      name:name,
+      price:price,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+  // 🔥 FAST CLEAR FOR NEXT PRODUCT
+  document.getElementById("productName").value="";
+  document.getElementById("productPrice").value="";
+  document.getElementById("productName").focus();
+
+  btn.disabled=false;
+  btn.innerText="Keyingisi";
+}
+
+function goBack(){
+  window.location.href="dashboard.html";
+}
+
+</script>
+
+</body>
+</html>
