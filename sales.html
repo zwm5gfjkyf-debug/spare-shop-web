@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8" />
-<title>Sotuvlar ro‘yxati</title>
+<title>📊 Sotuvlar ro‘yxati</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,18 +11,26 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+*{box-sizing:border-box;}
+
 body{
   font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
   margin:0;
   padding:20px;
   color:white;
+  animation:fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
 }
 
 h2{
   text-align:center;
   margin-bottom:25px;
-  font-size:26px;
+  font-size:24px;
   font-weight:600;
 }
 
@@ -38,11 +46,16 @@ h2{
   border-radius:25px;
   border:none;
   background:rgba(255,255,255,0.08);
-  color:#ccc;
+  color:#aaa;
   font-weight:600;
-  font-size:14px;
+  font-size:13px;
   cursor:pointer;
   transition:0.25s;
+}
+
+.switcher button.active{
+  background:#22c55e;
+  color:white;
 }
 
 .switcher button:hover{
@@ -51,24 +64,24 @@ h2{
 }
 
 .card{
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(14px);
-  border-radius:28px;
-  padding:30px 20px;
-  margin-bottom:30px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  background:rgba(255,255,255,0.07);
+  backdrop-filter:blur(15px);
+  border-radius:25px;
+  padding:25px;
+  margin-bottom:25px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
 }
 
 canvas{
   width:100% !important;
-  height:480px !important;
+  height:420px !important;
 }
 
 .sale{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 0;
+  padding:15px 0;
   border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
@@ -76,12 +89,21 @@ canvas{
   border-bottom:none;
 }
 
+.sale-name{
+  font-weight:600;
+}
+
+.sale-time{
+  font-size:12px;
+  color:#aaa;
+}
+
 .back{
-  margin-top:30px;
-  padding:16px;
+  margin-top:20px;
+  padding:14px;
   border-radius:18px;
   border:none;
-  font-size:17px;
+  font-size:15px;
   background:linear-gradient(90deg,#3b82f6,#2563eb);
   color:white;
   cursor:pointer;
@@ -101,9 +123,9 @@ canvas{
 <h2>📊 Savdo grafigi</h2>
 
 <div class="switcher">
-  <button onclick="loadToday()">Bugun</button>
-  <button onclick="loadWeek()">Bu hafta</button>
-  <button onclick="loadMonth()">Bu oy</button>
+  <button id="btnToday" onclick="loadToday()">Bugun</button>
+  <button id="btnWeek" onclick="loadWeek()">Bu hafta</button>
+  <button id="btnMonth" onclick="loadMonth()">Bu oy</button>
 </div>
 
 <div class="card">
@@ -130,7 +152,9 @@ const firebaseConfig={
   appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
+if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
+}
 
 const auth=firebase.auth();
 const db=firebase.firestore();
@@ -148,6 +172,11 @@ auth.onAuthStateChanged(user=>{
   loadToday();
 });
 
+function setActive(buttonId){
+  document.querySelectorAll(".switcher button").forEach(b=>b.classList.remove("active"));
+  document.getElementById(buttonId).classList.add("active");
+}
+
 function drawChart(labels,data){
   if(chart) chart.destroy();
 
@@ -158,17 +187,11 @@ function drawChart(labels,data){
       datasets:[{
         data,
         borderColor:"#22c55e",
-        borderWidth:4,
-        pointRadius:6,
-        pointBackgroundColor:"#22c55e",
+        borderWidth:3,
+        pointRadius:4,
         fill:true,
-        tension:0.45,
-        backgroundColor:(context)=>{
-          const gradient=context.chart.ctx.createLinearGradient(0,0,0,480);
-          gradient.addColorStop(0,"rgba(34,197,94,0.35)");
-          gradient.addColorStop(1,"rgba(34,197,94,0.02)");
-          return gradient;
-        }
+        tension:0.4,
+        backgroundColor:"rgba(34,197,94,0.15)"
       }]
     },
     options:{
@@ -179,16 +202,12 @@ function drawChart(labels,data){
         y:{
           ticks:{
             color:"#aaa",
-            font:{size:12},
             callback:value=>value.toLocaleString()+" so‘m"
           },
           grid:{color:"rgba(255,255,255,0.05)"}
         },
         x:{
-          ticks:{
-            color:"#aaa",
-            font:{size:12}
-          },
+          ticks:{color:"#aaa"},
           grid:{display:false}
         }
       }
@@ -196,59 +215,102 @@ function drawChart(labels,data){
   });
 }
 
-/* ===== TODAY ===== */
+function renderList(snapshot,formatLabel){
+
+  let total=0;
+  const labels=[];
+  const data=[];
+  const list=document.getElementById("salesList");
+  list.innerHTML="";
+
+  if(snapshot.empty){
+    list.innerHTML="Sotuv yo‘q";
+  }
+
+  snapshot.forEach(doc=>{
+    const sale=doc.data();
+    if(!sale.createdAt) return;
+
+    const dateObj=sale.createdAt.toDate();
+    const label=formatLabel(dateObj);
+
+    total+=Number(sale.price);
+    labels.push(label);
+    data.push(total);
+
+    const div=document.createElement("div");
+    div.className="sale";
+    div.innerHTML=`
+      <div>
+        <div class="sale-name">${sale.name}</div>
+        <div class="sale-time">${label}</div>
+      </div>
+      <strong>${Number(sale.price).toLocaleString()} so‘m</strong>
+    `;
+    list.appendChild(div);
+  });
+
+  drawChart(labels,data);
+}
+
+/* TODAY */
 function loadToday(){
+  setActive("btnToday");
+
   const start=new Date();
   start.setHours(0,0,0,0);
 
   db.collection("users").doc(currentUID)
-    .collection("sales")
-    .where("createdAt",">=",start)
-    .orderBy("createdAt")
-    .get()
-    .then(snapshot=>{
-      let total=0;
-      const labels=[];
-      const data=[];
-      const list=document.getElementById("salesList");
-      list.innerHTML="";
-
-      if(snapshot.empty){
-        list.innerHTML="Bugun sotuv yo‘q";
-      }
-
-      snapshot.forEach(doc=>{
-        const sale=doc.data();
-        if(!sale.createdAt) return;
-
-        const time=sale.createdAt.toDate()
-          .toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit",hour12:false});
-
-        total+=Number(sale.price);
-        labels.push(time);
-        data.push(total);
-
-        const div=document.createElement("div");
-        div.className="sale";
-
-        div.innerHTML=`
-          <div>
-            <div style="font-weight:600;">${sale.name}</div>
-            <div style="font-size:12px;color:#aaa;">🕒 ${time}</div>
-          </div>
-          <strong>${Number(sale.price).toLocaleString()} so‘m</strong>
-        `;
-
-        list.appendChild(div);
-      });
-
-      drawChart(labels,data);
-    });
+  .collection("sales")
+  .where("createdAt",">=",start)
+  .orderBy("createdAt")
+  .get()
+  .then(snapshot=>{
+    renderList(snapshot,date=>
+      date.toLocaleTimeString("uz-UZ",{hour:"2-digit",minute:"2-digit"})
+    );
+  });
 }
 
-/* WEEK + MONTH stay unchanged */
-function loadWeek(){ /* same as yours */ }
-function loadMonth(){ /* same as yours */ }
+/* WEEK */
+function loadWeek(){
+  setActive("btnWeek");
+
+  const start=new Date();
+  start.setDate(start.getDate()-6);
+  start.setHours(0,0,0,0);
+
+  db.collection("users").doc(currentUID)
+  .collection("sales")
+  .where("createdAt",">=",start)
+  .orderBy("createdAt")
+  .get()
+  .then(snapshot=>{
+    renderList(snapshot,date=>
+      date.toLocaleDateString("uz-UZ",{weekday:"short"})
+    );
+  });
+}
+
+/* MONTH */
+function loadMonth(){
+  setActive("btnMonth");
+
+  const start=new Date();
+  start.setDate(1);
+  start.setHours(0,0,0,0);
+
+  db.collection("users").doc(currentUID)
+  .collection("sales")
+  .where("createdAt",">=",start)
+  .orderBy("createdAt")
+  .get()
+  .then(snapshot=>{
+    renderList(snapshot,date=>
+      date.getDate()
+    );
+  });
+}
 </script>
 
 </body>
