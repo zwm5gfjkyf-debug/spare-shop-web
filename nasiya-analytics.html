@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Nasiya Tahlil</title>
+<title>💳 Nasiya Tahlil</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -13,33 +13,49 @@
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
   color:white;
   padding:20px;
+  animation:fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
 }
 
 h2{
   text-align:center;
-  margin-bottom:25px;
+  margin-bottom:30px;
+  font-size:24px;
+  font-weight:600;
 }
 
 .stats{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:15px;
+  gap:18px;
   margin-bottom:30px;
 }
 
 .card{
-  background:rgba(255,255,255,0.08);
-  padding:20px;
-  border-radius:18px;
+  background:rgba(255,255,255,0.07);
+  padding:22px;
+  border-radius:22px;
+  backdrop-filter:blur(15px);
+  box-shadow:0 15px 40px rgba(0,0,0,0.5);
+  transition:all 0.25s ease;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 50px rgba(0,0,0,0.7);
 }
 
 .card h3{
   margin:0 0 10px;
-  font-size:14px;
-  opacity:0.8;
+  font-size:13px;
+  opacity:0.7;
 }
 
 .card p{
@@ -49,51 +65,76 @@ h2{
 }
 
 .customer{
-  background:rgba(255,255,255,0.07);
-  padding:18px;
-  border-radius:16px;
-  margin-bottom:15px;
+  background:rgba(255,255,255,0.06);
+  padding:22px;
+  border-radius:22px;
+  margin-bottom:20px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.4);
+  animation:slideUp 0.4s ease forwards;
+}
+
+@keyframes slideUp{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.customer h4{
+  margin:0 0 10px;
 }
 
 .section-title{
-  margin-top:12px;
-  font-size:13px;
-  opacity:0.7;
+  margin-top:14px;
+  font-size:12px;
+  opacity:0.6;
 }
 
 .item-line{
   font-size:13px;
-  opacity:0.9;
-  margin:4px 0;
+  margin:5px 0;
 }
 
 .payment-line{
   font-size:13px;
   color:#22c55e;
-  margin:4px 0;
+  margin:5px 0;
 }
 
 .pay-btn{
-  margin-top:12px;
-  padding:8px 14px;
+  margin-top:15px;
+  padding:10px 16px;
   border:none;
-  border-radius:10px;
+  border-radius:14px;
   cursor:pointer;
   font-size:14px;
-  background:#16a34a;
+  font-weight:600;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
   color:white;
+  transition:all 0.25s ease;
+}
+
+.pay-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 25px rgba(34,197,94,0.5);
 }
 
 .back-btn{
-  margin-top:25px;
+  margin-top:30px;
   width:100%;
   padding:16px;
   border:none;
-  border-radius:18px;
+  border-radius:20px;
   background:linear-gradient(90deg,#3b82f6,#2563eb);
   color:white;
-  font-size:18px;
+  font-size:16px;
   cursor:pointer;
+  font-weight:600;
+  transition:all 0.25s ease;
+}
+
+.back-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(59,130,246,0.5);
 }
 </style>
 </head>
@@ -121,7 +162,6 @@ h2{
 </button>
 
 <script>
-
 const firebaseConfig={
   apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain:"spare-shop-web.firebaseapp.com",
@@ -131,7 +171,9 @@ const firebaseConfig={
   appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth=firebase.auth();
 const db=firebase.firestore();
@@ -146,11 +188,11 @@ auth.onAuthStateChanged(user=>{
 
 function loadNasiya(uid){
 
-  let totalDebt = 0;
-  let totalItems = 0;
+  let totalDebt=0;
+  let totalItems=0;
 
-  const list = document.getElementById("customerList");
-  list.innerHTML = "";
+  const list=document.getElementById("customerList");
+  list.innerHTML="";
 
   db.collection("users")
     .doc(uid)
@@ -159,176 +201,123 @@ function loadNasiya(uid){
     .then(snapshot=>{
 
       if(snapshot.empty){
-        list.innerHTML = "<p>Nasiya yo‘q</p>";
+        list.innerHTML="<p style='opacity:0.6'>Nasiya yo‘q</p>";
       }
 
       snapshot.forEach(async doc=>{
 
-        const data = doc.data();
-        const name = doc.id;
+        const data=doc.data();
+        const name=doc.id;
 
-        const debt = Number(data.totalDebt || 0);
-        const itemsCount = Number(data.totalItems || 0);
+        const debt=Number(data.totalDebt||0);
+        const itemsCount=Number(data.totalItems||0);
 
-        totalDebt += debt;
-        totalItems += itemsCount;
+        totalDebt+=debt;
+        totalItems+=itemsCount;
 
-        const div = document.createElement("div");
-        div.className = "customer";
-
-        div.innerHTML = `
+        const div=document.createElement("div");
+        div.className="customer";
+        div.innerHTML=`
           <h4>👤 ${name}</h4>
-          <p>📦 Tovar: ${itemsCount} ta</p>
-          <p>💰 Qarzi: ${debt.toLocaleString()} so‘m</p>
+          <p>📦 ${itemsCount} ta | 💰 ${debt.toLocaleString()} so‘m</p>
           <div class="section-title">🛒 Olingan mahsulotlar:</div>
           <div id="items-${name}"></div>
           <div class="section-title">💸 To‘lovlar:</div>
           <div id="payments-${name}"></div>
           <button class="pay-btn" onclick="payDebt('${name}')">💸 To‘landi</button>
         `;
-
         list.appendChild(div);
 
-        /* LOAD ITEMS */
-        /* LOAD ITEMS (NEW STRUCTURE) */
-const itemsContainer = document.getElementById("items-"+name);
+        const itemsSnap=await db.collection("users").doc(uid)
+          .collection("debts").doc(name)
+          .collection("items")
+          .orderBy("createdAt","desc").get();
 
-const itemsSnap = await db
-  .collection("users")
-  .doc(uid)
-  .collection("debts")
-  .doc(name)
-  .collection("items")
-  .orderBy("createdAt","desc")
-  .get();
+        const itemsContainer=document.getElementById("items-"+name);
 
-if(!itemsSnap.empty){
-  itemsSnap.forEach(itemDoc=>{
-    const item = itemDoc.data();
-    const date = item.createdAt
-      ? item.createdAt.toDate().toLocaleString("uz-UZ")
-      : "";
-    itemsContainer.innerHTML += `
-      <div class="item-line">
-        • ${item.spareName} - ${item.price.toLocaleString()} so‘m 
-        <span style="opacity:0.6;">(${date})</span>
-      </div>
-    `;
-  });
-}
+        itemsSnap.forEach(itemDoc=>{
+          const item=itemDoc.data();
+          const date=item.createdAt?item.createdAt.toDate().toLocaleString("uz-UZ"):"";
+          itemsContainer.innerHTML+=`
+            <div class="item-line">
+              • ${item.spareName} - ${item.price.toLocaleString()} so‘m
+              <span style="opacity:0.5">(${date})</span>
+            </div>`;
+        });
 
-/* LOAD ITEMS (OLD STRUCTURE COMPATIBILITY) */
-const oldSnap = await db
-  .collection("users")
-  .doc(uid)
-  .collection("nasiyaSales")
-  .where("customer","==",name)
-  .orderBy("createdAt","desc")
-  .get();
-
-oldSnap.forEach(oldDoc=>{
-  const item = oldDoc.data();
-  const date = item.createdAt
-    ? item.createdAt.toDate().toLocaleString("uz-UZ")
-    : "";
-  itemsContainer.innerHTML += `
-    <div class="item-line">
-      • ${item.name} - ${item.price.toLocaleString()} so‘m 
-      <span style="opacity:0.6;">(${date})</span>
-    </div>
-  `;
-});
-
-        /* LOAD PAYMENTS */
-        const paySnap = await db
-          .collection("users")
-          .doc(uid)
-          .collection("debts")
-          .doc(name)
+        const paySnap=await db.collection("users").doc(uid)
+          .collection("debts").doc(name)
           .collection("payments")
-          .orderBy("createdAt","desc")
-          .get();
+          .orderBy("createdAt","desc").get();
 
-        const payContainer = document.getElementById("payments-"+name);
+        const payContainer=document.getElementById("payments-"+name);
 
         paySnap.forEach(payDoc=>{
-          const p = payDoc.data();
-          const date = p.createdAt
-            ? p.createdAt.toDate().toLocaleString("uz-UZ")
-            : "";
-          payContainer.innerHTML += `
+          const p=payDoc.data();
+          const date=p.createdAt?p.createdAt.toDate().toLocaleString("uz-UZ"):"";
+          payContainer.innerHTML+=`
             <div class="payment-line">
-              • ${p.amount.toLocaleString()} so‘m 
-              <span style="opacity:0.6;">(${date})</span>
-            </div>
-          `;
+              • ${p.amount.toLocaleString()} so‘m
+              <span style="opacity:0.5">(${date})</span>
+            </div>`;
         });
 
       });
 
-      document.getElementById("totalDebt").innerText =
+      document.getElementById("totalDebt").innerText=
         totalDebt.toLocaleString()+" so‘m";
 
-      document.getElementById("totalItems").innerText =
+      document.getElementById("totalItems").innerText=
         totalItems+" ta";
 
     });
 }
 
-/* PAYMENT SYSTEM */
 async function payDebt(customerName){
 
-  const amount = Number(prompt("Qancha to‘landi?"));
-
-  if(!amount || amount <= 0){
+  const amount=Number(prompt("Qancha to‘landi?"));
+  if(!amount||amount<=0){
     alert("To‘g‘ri summa kiriting");
     return;
   }
 
-  const user = auth.currentUser;
+  const user=auth.currentUser;
   if(!user) return;
 
-  const uid = user.uid;
+  const uid=user.uid;
 
-  const debtRef = db
-    .collection("users")
-    .doc(uid)
-    .collection("debts")
-    .doc(customerName);
+  const debtRef=db.collection("users").doc(uid)
+    .collection("debts").doc(customerName);
 
-  const doc = await debtRef.get();
+  const doc=await debtRef.get();
   if(!doc.exists) return;
 
-  const currentDebt = doc.data().totalDebt || 0;
-  const newDebt = currentDebt - amount;
+  const currentDebt=doc.data().totalDebt||0;
+  const newDebt=currentDebt-amount;
 
   await debtRef.collection("payments").add({
-    amount: amount,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    amount:amount,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  await db.collection("users")
-    .doc(uid)
-    .collection("sales")
-    .add({
-      name: "Nasiya to‘lov (" + customerName + ")",
-      price: amount,
-      type: "payment",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  await db.collection("users").doc(uid).collection("sales").add({
+    name:"Nasiya to‘lov ("+customerName+")",
+    price:amount,
+    type:"payment",
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
 
-  if(newDebt <= 0){
+  if(newDebt<=0){
     await debtRef.delete();
-  } else {
+  }else{
     await debtRef.update({
-      totalDebt: newDebt,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      totalDebt:newDebt,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
   }
 
   location.reload();
 }
-
 </script>
 
 </body>
