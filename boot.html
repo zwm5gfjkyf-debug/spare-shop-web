@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loading...</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+}
+</style>
+</head>
+<body>
+Loading...
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+firebase.auth().onAuthStateChanged(function(user){
+
+  if(user){
+    window.location.replace("dashboard.html");
+  }else{
+    window.location.replace("index.html");
+  }
+
+});
+</script>
+
+</body>
+</html>
+
