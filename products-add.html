@@ -2,15 +2,15 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Yangi tovarlar qo‘shish</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yangi tovar qo‘shish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   background:#f1f5f9;
-  display:none;
+  display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
@@ -22,15 +22,13 @@ body{
   border-radius:20px;
   width:100%;
   max-width:400px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  box-shadow:0 15px 40px rgba(0,0,0,0.15);
 }
-
-h2{text-align:center;}
 
 input{
   width:100%;
   padding:14px;
-  margin-top:12px;
+  margin:10px 0;
   border-radius:10px;
   border:1px solid #ccc;
   font-size:16px;
@@ -39,29 +37,34 @@ input{
 button{
   width:100%;
   padding:14px;
-  margin-top:16px;
+  margin-top:10px;
   border:none;
   border-radius:12px;
   font-size:16px;
   cursor:pointer;
 }
 
-.save{background:#16a34a;color:white;}
-.back{background:#2563eb;color:white;margin-top:10px;}
+.next{
+  background:#16a34a;
+  color:white;
+}
+
+.finish{
+  background:#2563eb;
+  color:white;
+}
 </style>
 </head>
-
 <body>
 
 <div class="card">
-<h2>Yangi tovar qo‘shish</h2>
+<h2>Yangi tovar</h2>
 
-<input id="productName" placeholder="Tovar nomi">
-<input id="productPrice" type="number" placeholder="Narxi (so‘m)">
+<input id="name" placeholder="Mahsulot nomi">
+<input id="price" type="number" placeholder="Narxi (so‘m)">
 
-<button id="saveBtn" class="save" onclick="saveProduct()">Keyingisi</button>
-<button class="back" onclick="goBack()">Orqaga</button>
-
+<button class="next" onclick="saveProduct(true)">Saqlash & Keyingisi</button>
+<button class="finish" onclick="saveProduct(false)">Saqlash & Chiqish</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -69,72 +72,55 @@ button{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-
 const firebaseConfig={
-  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-  authDomain:"spare-shop-web.firebaseapp.com",
-  projectId:"spare-shop-web",
-  storageBucket:"spare-shop-web.firebasestorage.app",
-  messagingSenderId:"960113811021",
-  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+authDomain:"spare-shop-web.firebaseapp.com",
+projectId:"spare-shop-web",
+storageBucket:"spare-shop-web.firebasestorage.app",
+messagingSenderId:"960113811021",
+appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-if(!firebase.apps.length){
-  firebase.initializeApp(firebaseConfig);
-}
-
+firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-let uid=null;
-
 auth.onAuthStateChanged(user=>{
-  if(!user){
-    window.location.href="index.html";
-    return;
-  }
-  uid=user.uid;
-  document.body.style.display="flex";
+if(!user){
+location.href="index.html";
+}
 });
 
-async function saveProduct(){
+async function saveProduct(goNext){
 
-  const btn=document.getElementById("saveBtn");
-  if(btn.disabled) return;
+const name=document.getElementById("name").value.trim();
+const price=Number(document.getElementById("price").value);
 
-  const name=document.getElementById("productName").value.trim();
-  const price=Number(document.getElementById("productPrice").value);
-
-  if(!name || !price){
-    alert("Iltimos barcha maydonlarni to‘ldiring");
-    return;
-  }
-
-  btn.disabled=true;
-  btn.innerText="Saqlanmoqda...";
-
-  await db.collection("users")
-    .doc(uid)
-    .collection("products")
-    .add({
-      name:name,
-      price:price,
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-  // 🔥 FAST CLEAR FOR NEXT PRODUCT
-  document.getElementById("productName").value="";
-  document.getElementById("productPrice").value="";
-  document.getElementById("productName").focus();
-
-  btn.disabled=false;
-  btn.innerText="Keyingisi";
+if(!name || !price){
+alert("Barcha maydonlarni to‘ldiring");
+return;
 }
 
-function goBack(){
-  window.location.href="dashboard.html";
-}
+const user=auth.currentUser;
+if(!user) return;
 
+await db.collection("users")
+.doc(user.uid)
+.collection("products")
+.add({
+name:name,
+price:price,
+createdAt:firebase.firestore.FieldValue.serverTimestamp()
+});
+
+if(goNext){
+document.getElementById("name").value="";
+document.getElementById("price").value="";
+document.getElementById("name").focus();
+}else{
+location.href="dashboard.html";
+}
+}
 </script>
 
 </body>
