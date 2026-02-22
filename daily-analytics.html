@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Kunlik tahlil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+  color:white;
+  padding:25px;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:30px;
+  font-weight:600;
+}
+
+.day-card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(16px);
+  padding:20px;
+  border-radius:22px;
+  margin-bottom:18px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.5);
+  transition:0.3s;
+}
+
+.day-card:hover{
+  transform:translateY(-4px);
+}
+
+.date{
+  font-size:14px;
+  opacity:0.7;
+  margin-bottom:10px;
+}
+
+.stats{
+  display:flex;
+  justify-content:space-between;
+  font-size:16px;
+  font-weight:600;
+}
+
+.back{
+  margin-top:25px;
+  width:100%;
+  padding:16px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(90deg,#3b82f6,#2563eb);
+  color:white;
+  font-size:17px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📅 Kunlik tahlil</h2>
+
+<div id="dailyContainer"></div>
+
+<button class="back" onclick="location.href='dashboard.html'">
+  ← Orqaga
+</button>
+
+<script>
+
+const firebaseConfig={
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+};
+
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+auth.onAuthStateChanged(user=>{
+  if(!user){
+    location.href="index.html";
+    return;
+  }
+  loadDaily(user.uid);
+});
+
+function loadDaily(uid){
+
+  db.collection("users")
+    .doc(uid)
+    .collection("sales")
+    .orderBy("createdAt","desc")
+    .get()
+    .then(snapshot=>{
+
+      const container=document.getElementById("dailyContainer");
+      container.innerHTML="";
+
+      const dailyData={};
+
+      snapshot.forEach(doc=>{
+        const s=doc.data();
+        if(!s.createdAt) return;
+        if(s.type==="payment") return;
+
+        const dateObj=s.createdAt.toDate();
+        const date=dateObj.toLocaleDateString("uz-UZ");
+
+        if(!dailyData[date]){
+          dailyData[date]={count:0,total:0};
+        }
+
+        dailyData[date].count+=1;
+        dailyData[date].total+=Number(s.price||0);
+      });
+
+      Object.entries(dailyData).forEach(([date,data])=>{
+
+        const div=document.createElement("div");
+        div.className="day-card";
+
+        div.innerHTML=`
+          <div class="date">${date}</div>
+          <div class="stats">
+            <span>📦 ${data.count} dona</span>
+            <span>💰 ${data.total.toLocaleString()} so‘m</span>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+
+      if(Object.keys(dailyData).length===0){
+        container.innerHTML="<p>Ma'lumot yo‘q</p>";
+      }
+
+    });
+}
+
+</script>
+
+</body>
+</html>
