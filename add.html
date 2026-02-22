@@ -6,72 +6,121 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
-  display: none; /* hide until auth ready */
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+
+/* ===== GLOBAL ===== */
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  height:100vh;
+  display:none; /* show after auth */
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+  font-family:'Segoe UI',sans-serif;
+  color:white;
+  overflow:hidden;
 }
 
-.box {
-  background: white;
-  width: 100%;
-  max-width: 380px;
-  padding: 24px;
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+/* ===== CARD ===== */
+.card{
+  width:100%;
+  max-width:420px;
+  padding:35px;
+  border-radius:28px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(18px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:slideUp 0.6s ease forwards;
 }
 
-h2 {
-  margin-top: 0;
-  text-align: center;
+/* Slide animation */
+@keyframes slideUp{
+  from{opacity:0; transform:translateY(40px);}
+  to{opacity:1; transform:translateY(0);}
 }
 
-label {
-  font-size: 14px;
-  color: #555;
-  margin-top: 12px;
-  display: block;
+h2{
+  text-align:center;
+  margin-bottom:30px;
+  font-weight:600;
+  letter-spacing:0.5px;
 }
 
-input {
-  width: 100%;
-  padding: 14px;
-  margin-top: 6px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+/* ===== INPUT ===== */
+label{
+  font-size:14px;
+  opacity:0.8;
+  display:block;
+  margin-top:14px;
 }
 
-button {
-  width: 100%;
-  margin-top: 20px;
-  padding: 16px;
-  font-size: 18px;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
+input{
+  width:100%;
+  padding:16px;
+  margin-top:6px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.08);
+  color:white;
+  font-size:16px;
+  transition:all 0.25s ease;
 }
 
-.save {
-  background: #16a34a;
-  color: white;
+input:focus{
+  outline:none;
+  border-color:#22c55e;
+  box-shadow:0 0 0 3px rgba(34,197,94,0.2);
 }
 
-.back {
-  background: #2563eb;
-  color: white;
-  margin-top: 10px;
+/* ===== BUTTONS ===== */
+button{
+  width:100%;
+  padding:18px;
+  margin-top:18px;
+  border:none;
+  border-radius:20px;
+  font-size:17px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.25s ease;
 }
+
+button:hover{
+  transform:translateY(-3px);
+}
+
+button:active{
+  transform:scale(0.96);
+}
+
+.save{
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:white;
+  box-shadow:0 10px 25px rgba(34,197,94,0.4);
+}
+
+.save:hover{
+  box-shadow:0 15px 35px rgba(34,197,94,0.6);
+}
+
+.back{
+  background:rgba(255,255,255,0.08);
+  color:white;
+  border:1px solid rgba(255,255,255,0.15);
+}
+
+.back:hover{
+  background:rgba(255,255,255,0.15);
+}
+
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h2>Naqd savdo</h2>
+<div class="card">
+
+  <h2>💵 Naqd savdo</h2>
 
   <label>Mahsulot tanlang</label>
   <input id="productSelect" list="productList" placeholder="Mahsulot tanlang">
@@ -82,6 +131,7 @@ button {
 
   <button id="saveBtn" class="save" onclick="saveSale()">Saqlash</button>
   <button class="back" onclick="goBack()">⬅ Orqaga</button>
+
 </div>
 
 <!-- Firebase -->
@@ -90,6 +140,7 @@ button {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
+
 const firebaseConfig = {
   apiKey: "AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain: "spare-shop-web.firebaseapp.com",
@@ -106,7 +157,7 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-/* ===== AUTH CHECK ===== */
+/* ===== AUTH ===== */
 auth.onAuthStateChanged(user => {
   if (!user) {
     window.location.href = "index.html";
@@ -130,78 +181,87 @@ function loadProducts(uid){
 
       snapshot.forEach(doc=>{
         const data = doc.data();
-
         const option = document.createElement("option");
         option.value = data.name;
         option.setAttribute("data-price", data.price);
-
         list.appendChild(option);
       });
     });
 }
 
 /* ===== AUTO FILL PRICE ===== */
-document.getElementById("productSelect").addEventListener("input", function(){
+document.addEventListener("DOMContentLoaded",()=>{
+  const productInput=document.getElementById("productSelect");
 
-  const inputValue = this.value;
-  const options = document.getElementById("productList").options;
+  productInput.addEventListener("input", function(){
+    const inputValue=this.value;
+    const options=document.getElementById("productList").options;
 
-  for (let i = 0; i < options.length; i++) {
-    if (options[i].value === inputValue) {
-      const price = options[i].getAttribute("data-price");
-      document.getElementById("price").value = price;
-      break;
+    for(let i=0;i<options.length;i++){
+      if(options[i].value===inputValue){
+        const price=options[i].getAttribute("data-price");
+        document.getElementById("price").value=price;
+        break;
+      }
     }
-  }
-
+  });
 });
 
 /* ===== SAVE SALE ===== */
 function saveSale(){
 
-  const btn = document.getElementById("saveBtn");
-  if (btn.disabled) return;
+  const btn=document.getElementById("saveBtn");
+  if(btn.disabled) return;
 
-  const name = document.getElementById("productSelect").value.trim();
-  const price = Number(document.getElementById("price").value);
+  const name=document.getElementById("productSelect").value.trim();
+  const price=Number(document.getElementById("price").value);
 
-  if (!name || !price) {
+  if(!name || !price){
     alert("Barcha maydonlarni to‘ldiring");
     return;
   }
 
-  const user = auth.currentUser;
-  if (!user) {
-    window.location.href = "index.html";
+  const user=auth.currentUser;
+  if(!user){
+    window.location.href="index.html";
     return;
   }
 
-  btn.disabled = true;
-  btn.innerText = "Saqlanmoqda...";
+  btn.disabled=true;
+  btn.innerText="Saqlanmoqda...";
 
   db.collection("users")
     .doc(user.uid)
     .collection("sales")
     .add({
-      name: name,
-      price: price,
-      type: "product",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      name:name,
+      price:price,
+      type:"product",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     })
-    .then(() => {
-      window.location.href = "dashboard.html";
+    .then(()=>{
+      smoothRedirect("dashboard.html");
     })
-    .catch(error => {
+    .catch(error=>{
       alert(error.message);
-      btn.disabled = false;
-      btn.innerText = "Saqlash";
+      btn.disabled=false;
+      btn.innerText="Saqlash";
     });
 }
 
-/* ===== BACK ===== */
-function goBack() {
-  window.location.href = "dashboard.html";
+/* ===== SMOOTH REDIRECT ===== */
+function smoothRedirect(page){
+  document.body.style.opacity="0";
+  document.body.style.transition="0.3s";
+  setTimeout(()=>{
+    window.location.href=page;
+  },300);
 }
+
+function goBack(){
+  smoothRedirect("dashboard.html");
+}
+
 </script>
 
 </body>
