@@ -95,25 +95,24 @@ const firebaseConfig = {
   projectId: "spare-shop-web",
   storageBucket: "spare-shop-web.firebasestorage.app",
   messagingSenderId: "960113811021",
-  appId: "1:960113811021:web:8ae1451d3cba1148a0c604",
-  measurementId: "G-E762WWCRKB"
+  appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-  firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = "index.html";
-    }
-  });
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    window.location.href = "index.html";
+  }
+});
 
- function saveSpare() {
+function saveSpare() {
+
   const btn = document.getElementById("saveBtn");
 
-  // ⛔ Prevent double click
   if (btn.disabled) return;
 
   btn.disabled = true;
@@ -130,6 +129,7 @@ const firebaseConfig = {
   }
 
   const user = auth.currentUser;
+
   if (!user) {
     alert("Qayta kiring");
     window.location.href = "index.html";
@@ -139,12 +139,12 @@ const firebaseConfig = {
   db.collection("users")
     .doc(user.uid)
     .collection("sales")
-   .add({
-  name: spareName,
-  price: price,
-  type: "product",   // 🔥
-  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-});
+    .add({
+      name: name,                // ✅ FIXED
+      price: price,
+      type: "product",
+      createdAt: new Date()      // ✅ safer than serverTimestamp
+    })
     .then(() => {
       window.location.href = "dashboard.html";
     })
@@ -155,18 +155,9 @@ const firebaseConfig = {
     });
 }
 
-  function goBack() {
-    window.location.href = "dashboard.html";
-  }
-  await db.collection("users")
-  .doc(uid)
-  .collection("sales")
-  .add({
-    name: spareName,
-    price: price,
-    type: "product",   // MUST BE HERE
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+function goBack() {
+  window.location.href = "dashboard.html";
+}
 </script>
 
 </body>
