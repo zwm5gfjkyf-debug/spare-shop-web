@@ -11,26 +11,48 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+
+/* ===== GLOBAL ===== */
+*{box-sizing:border-box;}
+
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
   color:white;
-  padding:20px;
+  padding:25px;
+  animation:fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
 }
 
 h2{
   text-align:center;
-  margin-bottom:20px;
+  margin-bottom:25px;
   font-size:26px;
+  font-weight:600;
 }
 
-.chart-card{
-  background:rgba(255,255,255,0.07);
-  border-radius:22px;
+/* ===== GLASS CARD ===== */
+.glass{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(16px);
+  border-radius:26px;
   padding:25px;
-  box-shadow:0 15px 40px rgba(0,0,0,0.5);
-  margin-bottom:25px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transition:all 0.3s ease;
+}
+
+.glass:hover{
+  transform:translateY(-4px);
+}
+
+/* ===== CHART ===== */
+.chart-card{
+  margin-bottom:30px;
 }
 
 canvas{
@@ -38,42 +60,62 @@ canvas{
   height:380px !important;
 }
 
+/* ===== STATS GRID ===== */
 .stats-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-bottom:25px;
+  gap:18px;
+  margin-bottom:30px;
 }
 
 .stat-card{
-  background:rgba(255,255,255,0.07);
-  padding:18px;
-  border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  padding:20px;
+  border-radius:22px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(14px);
+  box-shadow:0 12px 35px rgba(0,0,0,0.45);
+  transition:all 0.3s ease;
+}
+
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 18px 45px rgba(0,0,0,0.6);
 }
 
 .stat-title{
   font-size:14px;
   opacity:0.7;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
 
 .stat-value{
-  font-size:20px;
+  font-size:22px;
   font-weight:600;
 }
 
+/* ===== BUTTON ===== */
 .back-btn{
   width:100%;
-  padding:16px;
+  padding:18px;
   border:none;
-  border-radius:18px;
+  border-radius:22px;
   background:linear-gradient(90deg,#3b82f6,#2563eb);
   color:white;
   font-size:18px;
   cursor:pointer;
   font-weight:600;
+  transition:all 0.25s ease;
 }
+
+.back-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(59,130,246,0.5);
+}
+
+.back-btn:active{
+  transform:scale(0.96);
+}
+
 </style>
 </head>
 
@@ -81,7 +123,7 @@ canvas{
 
 <h2>📊 Tahlil</h2>
 
-<div class="chart-card">
+<div class="glass chart-card">
   <canvas id="analyticsChart"></canvas>
 </div>
 
@@ -97,7 +139,6 @@ canvas{
     <div class="stat-value" id="totalItems">0 dona</div>
   </div>
 
-
   <div class="stat-card">
     <div class="stat-title">🥇 Eng ko‘p sotilgan</div>
     <div class="stat-value" id="topProduct">—</div>
@@ -105,9 +146,10 @@ canvas{
 
 </div>
 
-<button class="back-btn" onclick="location.href='dashboard.html'">
+<button class="back-btn" onclick="smoothBack()">
   ← Orqaga
 </button>
+
 <script>
 
 const firebaseConfig = {
@@ -119,7 +161,9 @@ const firebaseConfig = {
   appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -205,18 +249,35 @@ function drawChart(labels,data){
     },
     options:{
       responsive:true,
+      animation:{duration:1000},
       plugins:{legend:{display:false}},
       scales:{
         y:{
           ticks:{
+            color:"white",
             callback:value=>value.toLocaleString()+" so‘m"
-          }
+          },
+          grid:{color:"rgba(255,255,255,0.05)"}
+        },
+        x:{
+          ticks:{color:"white"},
+          grid:{display:false}
         }
       }
     }
   });
 }
 
+/* Smooth back */
+function smoothBack(){
+  document.body.style.opacity="0";
+  document.body.style.transition="0.3s";
+  setTimeout(()=>{
+    window.location.href="dashboard.html";
+  },300);
+}
+
 </script>
+
 </body>
 </html>
