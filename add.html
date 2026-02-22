@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8" />
-<title>Mahsulot qo‘shish</title>
+<title>Naqd savdo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
@@ -10,7 +10,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f1f5f9;
-  display: none; /* 🔥 hide until auth ready */
+  display: none; /* hide until auth ready */
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -71,15 +71,16 @@ button {
 <body>
 
 <div class="box">
-  <h2>Mahsulot qo‘shish</h2>
+  <h2>Naqd savdo</h2>
 
-  <label>Mahsulot nomi</label>
-  <input id="name" placeholder="Masalan: Motor">
+  <label>Mahsulot tanlang</label>
+  <input id="productSelect" list="productList" placeholder="Mahsulot tanlang">
+  <datalist id="productList"></datalist>
 
   <label>Narxi (so‘m)</label>
   <input id="price" type="number" placeholder="Masalan: 20000">
 
-  <button id="saveBtn" class="save" onclick="saveSpare()">Saqlash</button>
+  <button id="saveBtn" class="save" onclick="saveSale()">Saqlash</button>
   <button class="back" onclick="goBack()">⬅ Orqaga</button>
 </div>
 
@@ -98,7 +99,6 @@ const firebaseConfig = {
   appId: "1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-/* Prevent double init */
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -113,20 +113,60 @@ auth.onAuthStateChanged(user => {
     return;
   }
 
-  document.body.style.display = "flex"; // 🔥 show only after auth
+  document.body.style.display = "flex";
+  loadProducts(user.uid);
 });
 
-/* ===== SAVE PRODUCT ===== */
-function saveSpare() {
+/* ===== LOAD PRODUCTS ===== */
+function loadProducts(uid){
+
+  db.collection("users")
+    .doc(uid)
+    .collection("products")
+    .get()
+    .then(snapshot=>{
+      const list = document.getElementById("productList");
+      list.innerHTML = "";
+
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+
+        const option = document.createElement("option");
+        option.value = data.name;
+        option.setAttribute("data-price", data.price);
+
+        list.appendChild(option);
+      });
+    });
+}
+
+/* ===== AUTO FILL PRICE ===== */
+document.getElementById("productSelect").addEventListener("input", function(){
+
+  const inputValue = this.value;
+  const options = document.getElementById("productList").options;
+
+  for (let i = 0; i < options.length; i++) {
+    if (options[i].value === inputValue) {
+      const price = options[i].getAttribute("data-price");
+      document.getElementById("price").value = price;
+      break;
+    }
+  }
+
+});
+
+/* ===== SAVE SALE ===== */
+function saveSale(){
 
   const btn = document.getElementById("saveBtn");
   if (btn.disabled) return;
 
-  const name = document.getElementById("name").value.trim();
+  const name = document.getElementById("productSelect").value.trim();
   const price = Number(document.getElementById("price").value);
 
   if (!name || !price) {
-    alert("Iltimos, barcha maydonlarni to‘ldiring");
+    alert("Barcha maydonlarni to‘ldiring");
     return;
   }
 
