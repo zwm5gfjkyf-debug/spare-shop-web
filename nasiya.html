@@ -86,7 +86,7 @@ button{
 <input type="text" id="customerName" list="customers" placeholder="Mijoz ismi">
 <datalist id="customers"></datalist>
 
-<button class="save" onclick="saveDebt()">Saqlash</button>
+<button id="saveBtn" class="save" onclick="saveDebt()">Saqlash</button>
 <button class="back" onclick="location.href='dashboard.html'">← Orqaga</button>
 
 </div>
@@ -136,10 +136,22 @@ function loadCustomers(uid){
     });
 }
 
-/* SAVE NASIYA */
+/* SAVE NASIYA WITH DOUBLE CLICK PROTECTION */
 async function saveDebt(){
 
-  if(!currentUID) return;
+  const btn=document.getElementById("saveBtn");
+
+  // 🚫 Prevent double click
+  if(btn.disabled) return;
+
+  btn.disabled=true;
+  btn.innerText="Saqlanmoqda...";
+
+  if(!currentUID){
+    btn.disabled=false;
+    btn.innerText="Saqlash";
+    return;
+  }
 
   const spareName=document.getElementById("spareName").value.trim();
   const price=Number(document.getElementById("price").value);
@@ -147,6 +159,8 @@ async function saveDebt(){
 
   if(!spareName || !price || !customerName){
     alert("Barcha maydonlarni to‘ldiring");
+    btn.disabled=false;
+    btn.innerText="Saqlash";
     return;
   }
 
@@ -175,7 +189,6 @@ async function saveDebt(){
       });
     }
 
-    /* 🔥 SAVE ITEM INSIDE DEBT (IMPORTANT) */
     await debtRef.collection("items").add({
       spareName: spareName,
       price: price,
@@ -187,6 +200,8 @@ async function saveDebt(){
   }catch(error){
     console.error(error);
     alert("Xatolik yuz berdi");
+    btn.disabled=false;
+    btn.innerText="Saqlash";
   }
 }
 
