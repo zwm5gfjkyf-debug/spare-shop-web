@@ -242,19 +242,16 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-/* ========================= */
-/* ===== AUTH CHECK ======== */
-/* ========================= */
+firebase.auth().onAuthStateChanged(function(user) {
 
-
-
-  loader.style.display="none"; // 🔥 hide loading overlay
-  loadDashboard(user.uid);
+  if (user) {
+    loader.style.display = "none";
+    loadDashboard(user.uid);
+  } else {
+    window.location.href = "login.html";
+  }
 
 });
-
-
-function loadDashboard(uid){
 
 /* ========================= */
 /* ===== REALTIME SALES ==== */
