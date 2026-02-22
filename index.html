@@ -229,18 +229,22 @@ Loading...
 <script>
 
 const firebaseConfig={
-apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
-authDomain:"spare-shop-web.firebaseapp.com",
-projectId:"spare-shop-web",
-storageBucket:"spare-shop-web.firebasestorage.app",
-messagingSenderId:"960113811021",
-appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
+  apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
+  authDomain:"spare-shop-web.firebaseapp.com",
+  projectId:"spare-shop-web",
+  storageBucket:"spare-shop-web.firebasestorage.app",
+  messagingSenderId:"960113811021",
+  appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 const auth=firebase.auth();
 const db=firebase.firestore();
+
+/* ========================= */
+/* ===== AUTH CHECK ======== */
+/* ========================= */
 
 firebase.auth().onAuthStateChanged(function(user) {
 
@@ -252,6 +256,12 @@ firebase.auth().onAuthStateChanged(function(user) {
   }
 
 });
+
+/* ========================= */
+/* ===== LOAD DASHBOARD ==== */
+/* ========================= */
+
+function loadDashboard(uid){
 
 /* ========================= */
 /* ===== REALTIME SALES ==== */
@@ -284,25 +294,21 @@ db.collection("users")
       const createdDate=s.createdAt.toDate();
       const price=Number(s.price||0);
 
-      /* TODAY */
       if(createdDate>=todayStart && createdDate<tomorrowStart){
         tS+=price;
         if(!s.type || s.type==="product"){ tC++; }
       }
 
-      /* WEEK */
       if(createdDate>=weekStart){
         wS+=price;
         if(!s.type || s.type==="product"){ wC++; }
       }
 
-      /* MONTH */
       if(createdDate>=monthStart){
         mS+=price;
         if(!s.type || s.type==="product"){ mC++; }
       }
 
-      /* TOP PRODUCT */
       if(!s.type || s.type==="product"){
         productCount[s.name]=(productCount[s.name]||0)+1;
       }
@@ -317,10 +323,9 @@ db.collection("users")
     document.getElementById("topProduct").innerText=
       top?top[0]+" ("+top[1]+" marta)":"—";
 
-    removeSkeleton(); // 🔥 remove skeleton only after data loads
+    removeSkeleton();
 
 });
-
 
 /* ========================= */
 /* ===== REALTIME NASIYA ==== */
@@ -344,8 +349,11 @@ db.collection("users")
     document.getElementById("debtTotal").innerText=
       nasiyaTotal.toLocaleString()+" so‘m";
 
+  });   // ✅ THIS WAS MISSING
 
-}
+} // ✅ close loadDashboard function
+
+
 /* ========================= */
 /* ===== REMOVE SKELETON ==== */
 /* ========================= */
