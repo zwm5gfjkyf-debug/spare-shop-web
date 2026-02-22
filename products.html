@@ -2,44 +2,126 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Barcha tovarlar</title>
+<title>📦 Barcha tovarlar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+*{box-sizing:border-box;}
+
 body{
   margin:0;
-  font-family:Arial;
-  background:#f1f5f9;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+  color:white;
   padding:20px;
+  animation:fadeIn 0.4s ease forwards;
 }
 
-.card{
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+h2{
+  text-align:center;
+  margin-bottom:25px;
+  font-weight:600;
+}
+
+.product-card{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(15px);
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:14px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  box-shadow:0 12px 30px rgba(0,0,0,0.5);
+  transition:all 0.25s ease;
+}
+
+.product-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 40px rgba(0,0,0,0.7);
+}
+
+.product-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.product-name{
+  font-weight:600;
+}
+
+.product-price{
+  font-size:14px;
+  opacity:0.8;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
 }
 
 button{
   padding:6px 10px;
   border:none;
-  border-radius:6px;
+  border-radius:10px;
   cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  transition:all 0.2s ease;
+}
+
+.edit{
+  background:#3b82f6;
+  color:white;
+}
+
+.edit:hover{
+  background:#2563eb;
 }
 
 .delete{
   background:#ef4444;
   color:white;
 }
+
+.delete:hover{
+  background:#dc2626;
+}
+
+.back-btn{
+  margin-top:25px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:white;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.25s ease;
+}
+
+.back-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(34,197,94,0.5);
+}
 </style>
 </head>
 <body>
 
-<h2>Barcha tovarlar</h2>
+<h2>📦 Barcha tovarlar</h2>
+
 <div id="productList"></div>
+
+<button class="back-btn" onclick="location.href='dashboard.html'">
+← Orqaga
+</button>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -55,7 +137,10 @@ messagingSenderId:"960113811021",
 appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
+if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
+}
+
 const auth=firebase.auth();
 const db=firebase.firestore();
 
@@ -64,33 +149,69 @@ if(!user){
 location.href="index.html";
 return;
 }
+loadProducts(user.uid);
+});
+
+function loadProducts(uid){
 
 db.collection("users")
-.doc(user.uid)
+.doc(uid)
 .collection("products")
+.orderBy("createdAt","desc")
 .onSnapshot(snapshot=>{
 
 const container=document.getElementById("productList");
 container.innerHTML="";
 
+if(snapshot.empty){
+container.innerHTML="<p style='opacity:0.6'>Tovar yo‘q</p>";
+return;
+}
+
 snapshot.forEach(doc=>{
 const data=doc.data();
 
 const div=document.createElement("div");
-div.className="card";
+div.className="product-card";
 div.innerHTML=`
-<span>${data.name} - ${data.price.toLocaleString()} so‘m</span>
-<button class="delete" onclick="deleteProduct('${doc.id}')">X</button>
+<div class="product-info">
+<div class="product-name">${data.name}</div>
+<div class="product-price">${Number(data.price).toLocaleString()} so‘m</div>
+</div>
+<div class="actions">
+<button class="edit" onclick="editProduct('${doc.id}','${data.name}',${data.price})">✏</button>
+<button class="delete" onclick="deleteProduct('${doc.id}')">🗑</button>
+</div>
 `;
 
 container.appendChild(div);
 });
 
 });
-
-});
+}
 
 function deleteProduct(id){
+const user=auth.currentUser;
+if(!user) return;
+
+if(!confirm("Haqiqatan o‘chirmoqchimisiz?")) return;
+
+db.collection("users")
+.doc(user.uid)
+.collection("products")
+.doc(id)
+.delete();
+}
+
+function editProduct(id,name,price){
+
+const newPrice=Number(prompt(name+" uchun yangi narx:",price));
+
+if(!newPrice || newPrice<=0){
+alert("To‘g‘ri narx kiriting");
+return;
+}
+
 const user=auth.currentUser;
 if(!user) return;
 
@@ -98,7 +219,9 @@ db.collection("users")
 .doc(user.uid)
 .collection("products")
 .doc(id)
-.delete();
+.update({
+price:newPrice
+});
 }
 </script>
 
