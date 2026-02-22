@@ -15,9 +15,9 @@ body{
   background:linear-gradient(135deg,#0f172a,#1e293b);
   color:white;
   padding:20px;
-  padding-bottom:110px;
+  padding-bottom:130px;
   min-height:100vh;
-  display:none; /* 🔥 hide page until auth ready */
+  display:none;
 }
 
 /* Skeleton */
@@ -48,13 +48,26 @@ body{
 .card h3{margin:0 0 8px;font-size:15px;opacity:0.8;}
 .card p{margin:0;font-size:16px;font-weight:600;}
 
-.actions{margin-top:35px;display:flex;flex-direction:column;gap:18px;}
-.actions button{padding:18px;border:none;border-radius:20px;font-size:18px;font-weight:600;cursor:pointer;}
+.actions{
+  margin-top:35px;
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
 
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;height:65px;
-  background:#0f172a;display:flex;justify-content:space-around;
-  align-items:center;border-top:1px solid rgba(255,255,255,0.1);
+.actions button{
+  padding:16px;
+  border:none;
+  border-radius:16px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  background:rgba(255,255,255,0.1);
+  color:white;
+}
+
+.actions button:hover{
+  background:rgba(255,255,255,0.2);
 }
 </style>
 </head>
@@ -102,12 +115,30 @@ body{
   </div>
 </div>
 
+<!-- 🔥 NEW ACTION BUTTONS -->
+<div class="actions">
+  <button onclick="location.href='add.html'">
+    💵 Naqd savdo
+  </button>
+
+  <button onclick="location.href='nasiya.html'">
+    💳 Nasiya savdo
+  </button>
+
+  <button onclick="location.href='products-add.html'">
+    ➕ Yangi tovar qo‘shish
+  </button>
+
+  <button onclick="location.href='products.html'">
+    📦 Barcha tovarlar
+  </button>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-
 const firebaseConfig={
   apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
   authDomain:"spare-shop-web.firebaseapp.com",
@@ -121,19 +152,15 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-/* ================= AUTH ================= */
-
 auth.onAuthStateChanged(user=>{
   if(!user){
     window.location.href="index.html";
     return;
   }
 
-  document.body.style.display="block"; // 🔥 show page only after auth
+  document.body.style.display="block";
   loadDashboard(user.uid);
 });
-
-/* ================= DASHBOARD ================= */
 
 function loadDashboard(uid){
 
@@ -149,7 +176,6 @@ function loadDashboard(uid){
   const monthStart=new Date(todayStart);
   monthStart.setDate(1);
 
-  /* SALES REALTIME */
   db.collection("users").doc(uid).collection("sales")
   .onSnapshot(snapshot=>{
 
@@ -190,10 +216,8 @@ function loadDashboard(uid){
 
     const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
     updateUI("topProduct", top?top[0]+" ("+top[1]+" marta)":"—");
-
   });
 
-  /* NASIYA REALTIME */
   db.collection("users").doc(uid).collection("debts")
   .onSnapshot(snapshot=>{
 
@@ -210,13 +234,11 @@ function loadDashboard(uid){
   });
 }
 
-/* Remove skeleton safely */
 function updateUI(id,value){
   const el=document.getElementById(id);
   el.innerText=value;
   el.classList.remove("skeleton");
 }
-
 </script>
 </body>
 </html>
