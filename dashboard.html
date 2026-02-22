@@ -18,7 +18,24 @@ body{
   padding-bottom:110px;
   min-height:100vh;
 }
+/* ===== Skeleton Loader ===== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08) 25%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.2s infinite;
+  border-radius: 6px;
+  color: transparent;
+}
 
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .header{
   font-size:22px;
   font-weight:600;
@@ -127,12 +144,12 @@ body{
 <div class="top">
   <div class="big">
     <div><i class="fa-solid fa-box-open"></i> Bugun sotildi</div>
-    <h1 id="todayCount">...</h1>
+   <h1 id="todayCount" class="skeleton">000000</h1>
   </div>
 
   <div class="big">
     <div><i class="fa-solid fa-money-bill-wave"></i> Bugungi tushum</div>
-    <h1 id="todayTotal">...</h1>
+ <h1 id="todayTotal" class="skeleton">000000</h1>
   </div>
 </div>
 
@@ -140,28 +157,28 @@ body{
 <div class="cards">
   <div class="card">
     <h3><i class="fa-solid fa-credit-card"></i> Nasiya tovar</h3>
-    <p id="debtCount">0 ta</p>
+  <p id="debtCount" class="skeleton">000000</p>
   </div>
 
   <div class="card">
     <h3><i class="fa-solid fa-coins"></i> Umumiy nasiya</h3>
-    <p id="debtTotal">0 so‘m</p>
+ <p id="debtTotal" class="skeleton">000000</p>
   </div>
 
   <!-- ROW 3 -->
   <div class="card">
     <h3><i class="fa-solid fa-calendar-week"></i> Bu hafta</h3>
-    <p id="weekData">...</p>
+  <p id="weekData" class="skeleton">000000</p>
   </div>
 
   <div class="card">
     <h3><i class="fa-solid fa-calendar-days"></i> Bu oy</h3>
-    <p id="monthData">...</p>
+  <p id="monthData" class="skeleton">000000</p>
   </div>
 
   <div class="card">
     <h3><i class="fa-solid fa-star"></i> Eng ko‘p sotilgan</h3>
-    <p id="topProduct">...</p>
+  <p id="topProduct" class="skeleton">000000</p>
   </div>
 </div>
 
@@ -283,7 +300,7 @@ db.collection("users")
     const top=Object.entries(productCount).sort((a,b)=>b[1]-a[1])[0];
     document.getElementById("topProduct").innerText=
       top?top[0]+" ("+top[1]+" marta)":"—";
-
+removeSkeleton();
 });
 
 
@@ -312,5 +329,10 @@ db.collection("users")
 });
 
 }
-
+function removeSkeleton(){
+  const elements = document.querySelectorAll(".skeleton");
+  elements.forEach(el=>{
+    el.classList.remove("skeleton");
+  });
+}
 </script>
