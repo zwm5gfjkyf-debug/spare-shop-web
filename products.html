@@ -2,84 +2,50 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Yangi tovar qo‘shish</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barcha tovarlar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
   margin:0;
   font-family:Arial;
   background:#f1f5f9;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  padding:20px;
 }
-          
-.card{   
+
+.card{
   background:white;
-  width:100%;
-  max-width:400px;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-}
-
-h2{
-  text-align:center;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  font-size:16px;
-  border-radius:10px;
-  border:1px solid #ccc;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 button{
-  width:100%;
-  padding:16px;
-  margin-top:15px;
-  font-size:18px;
+  padding:6px 10px;
   border:none;
-  border-radius:14px;
+  border-radius:6px;
   cursor:pointer;
 }
 
-.save{
-  background:#16a34a;
-  color:white;
-}
-
-.back{
-  background:#2563eb;
+.delete{
+  background:#ef4444;
   color:white;
 }
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<h2>Yangi tovar qo‘shish</h2>
-
-<input type="text" id="name" placeholder="Spare nomi">
-<input type="number" id="price" placeholder="Narxi">
-
-<button class="save" onclick="saveProduct()">Keyingisi ➡</button>
-<button class="back" onclick="location.href='index.html'">⬅ Orqaga</button>
-
-</div>
+<h2>Barcha tovarlar</h2>
+<div id="productList"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-
 const firebaseConfig={
 apiKey:"AIzaSyAlE6UaaXEl2FnDI6fyMWyr4IV-j1BkJ6U",
 authDomain:"spare-shop-web.firebaseapp.com",
@@ -90,53 +56,50 @@ appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
 firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth=firebase.auth();
+const db=firebase.firestore();
 
 auth.onAuthStateChanged(user=>{
-  if(!user){
-    location.href="login.html";  // if your login file name is different tell me
-  }
-});
-
-async function saveProduct(){
-
-  const name = document.getElementById("name").value.trim();
-  const price = Number(document.getElementById("price").value);
-
-  if(!name || !price){
-    alert("Barcha maydonlarni to‘ldiring");
-    return;
-  }
-
-  const user = auth.currentUser;
-  if(!user) return;
-
-  try{
-
-    await db.collection("users")
-      .doc(user.uid)
-      .collection("products")
-      .add({
-        name:name,
-        price:price,
-        createdAt:firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    // Clear inputs
-    document.getElementById("name").value="";
-    document.getElementById("price").value="";
-
-    // Focus again for fast entry
-    document.getElementById("name").focus();
-
-  }catch(error){
-    alert("Xatolik yuz berdi");
-  }
-
+if(!user){
+location.href="index.html";
+return;
 }
 
+db.collection("users")
+.doc(user.uid)
+.collection("products")
+.onSnapshot(snapshot=>{
+
+const container=document.getElementById("productList");
+container.innerHTML="";
+
+snapshot.forEach(doc=>{
+const data=doc.data();
+
+const div=document.createElement("div");
+div.className="card";
+div.innerHTML=`
+<span>${data.name} - ${data.price.toLocaleString()} so‘m</span>
+<button class="delete" onclick="deleteProduct('${doc.id}')">X</button>
+`;
+
+container.appendChild(div);
+});
+
+});
+
+});
+
+function deleteProduct(id){
+const user=auth.currentUser;
+if(!user) return;
+
+db.collection("users")
+.doc(user.uid)
+.collection("products")
+.doc(id)
+.delete();
+}
 </script>
 
 </body>
