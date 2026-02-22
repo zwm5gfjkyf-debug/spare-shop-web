@@ -7,8 +7,6 @@
 <meta name="theme-color" content="#16a34a">
 
 <style>
-
-/* ===== GLOBAL ===== */
 *{box-sizing:border-box;}
 
 body{
@@ -17,7 +15,7 @@ body{
   background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
   color:white;
   padding:25px;
-  padding-bottom:140px;
+  padding-bottom:160px;
   min-height:100vh;
   display:none;
   animation:fadeIn 0.6s ease forwards;
@@ -28,15 +26,12 @@ body{
   to{opacity:1; transform:translateY(0);}
 }
 
-/* ===== HEADER ===== */
 .header{
   font-size:24px;
   font-weight:600;
   margin-bottom:30px;
-  letter-spacing:0.5px;
 }
 
-/* ===== TOP STATS ===== */
 .top{
   display:flex;
   gap:18px;
@@ -63,7 +58,6 @@ body{
   font-size:32px;
 }
 
-/* ===== CARDS ===== */
 .cards{
   margin-top:30px;
   display:grid;
@@ -96,7 +90,6 @@ body{
   font-weight:600;
 }
 
-/* ===== ACTION BUTTONS ===== */
 .actions{
   margin-top:40px;
   display:flex;
@@ -111,21 +104,8 @@ body{
   font-size:16px;
   font-weight:600;
   cursor:pointer;
-  background:linear-gradient(90deg,#22c55e,#16a34a);
   color:white;
   transition:all 0.25s ease;
-}
-
-.actions button:nth-child(2){
-  background:linear-gradient(90deg,#f59e0b,#ef4444);
-}
-
-.actions button:nth-child(3){
-  background:linear-gradient(90deg,#3b82f6,#2563eb);
-}
-
-.actions button:nth-child(4){
-  background:linear-gradient(90deg,#06b6d4,#0ea5e9);
 }
 
 .actions button:hover{
@@ -137,7 +117,13 @@ body{
   transform:scale(0.97);
 }
 
-/* ===== SKELETON ===== */
+/* Button Colors */
+.sell{ background:linear-gradient(90deg,#22c55e,#16a34a); }
+.analytics{ background:linear-gradient(90deg,#3b82f6,#2563eb); }
+.debtAnalytics{ background:linear-gradient(90deg,#f59e0b,#ef4444); }
+.products{ background:linear-gradient(90deg,#06b6d4,#0ea5e9); }
+.addProduct{ background:linear-gradient(90deg,#8b5cf6,#7c3aed); }
+
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -155,7 +141,6 @@ body{
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-
 </style>
 </head>
 
@@ -203,21 +188,27 @@ body{
 </div>
 
 <div class="actions">
-  <button onclick="location.href='add.html'">
-    💵 Naqd savdo
+
+  <button class="sell" onclick="location.href='/add-type.html'">
+    💰 Tovar sotish
   </button>
 
-  <button onclick="location.href='nasiya.html'">
-    💳 Nasiya savdo
+  <button class="analytics" onclick="location.href='/sales.html'">
+    📊 Tahlil
   </button>
 
-  <button onclick="location.href='products-add.html'">
+  <button class="debtAnalytics" onclick="location.href='/nasiya-analytics.html'">
+    💳 Nasiya Tahlil
+  </button>
+
+  <button class="products" onclick="location.href='/products.html'">
+    📦 Barcha tovarlar
+  </button>
+
+  <button class="addProduct" onclick="location.href='/products-add.html'">
     ➕ Yangi tovar qo‘shish
   </button>
 
-  <button onclick="location.href='products.html'">
-    📦 Barcha tovarlar
-  </button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -243,7 +234,7 @@ const db=firebase.firestore();
 
 auth.onAuthStateChanged(user=>{
   if(!user){
-    window.location.href="index.html";
+    window.location.href="/login.html";
     return;
   }
 
