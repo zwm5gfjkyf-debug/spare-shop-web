@@ -5,16 +5,12 @@
 <title>Nasiya savdo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
   background:#f3f4f6;
-  display:flex;
+  display:none; /* 🔥 Hide until auth ready */
   justify-content:center;
   align-items:center;
   height:100vh;
@@ -87,9 +83,14 @@ button{
 <datalist id="customers"></datalist>
 
 <button id="saveBtn" class="save" onclick="saveDebt()">Saqlash</button>
-<button class="back" onclick="location.href='dashboard.html'">← Orqaga</button>
+<button class="back" onclick="goBack()">← Orqaga</button>
 
 </div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
 
@@ -102,24 +103,31 @@ const firebaseConfig={
   appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-firebase.initializeApp(firebaseConfig);
+/* Prevent double init */
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUID=null;
 
-/* LOAD USER */
+/* ================= AUTH ================= */
+
 auth.onAuthStateChanged(user=>{
   if(!user){
-    location.href="index.html";
+    window.location.href="index.html";
     return;
   }
+
   currentUID=user.uid;
+  document.body.style.display="flex"; // 🔥 Show page only after auth
   loadCustomers(user.uid);
 });
 
-/* LOAD CUSTOMER SUGGESTIONS */
+/* ================= LOAD CUSTOMERS ================= */
+
 function loadCustomers(uid){
   db.collection("users")
     .doc(uid)
@@ -136,22 +144,12 @@ function loadCustomers(uid){
     });
 }
 
-/* SAVE NASIYA WITH DOUBLE CLICK PROTECTION */
+/* ================= SAVE NASIYA ================= */
+
 async function saveDebt(){
 
   const btn=document.getElementById("saveBtn");
-
-  // 🚫 Prevent double click
   if(btn.disabled) return;
-
-  btn.disabled=true;
-  btn.innerText="Saqlanmoqda...";
-
-  if(!currentUID){
-    btn.disabled=false;
-    btn.innerText="Saqlash";
-    return;
-  }
 
   const spareName=document.getElementById("spareName").value.trim();
   const price=Number(document.getElementById("price").value);
@@ -159,18 +157,19 @@ async function saveDebt(){
 
   if(!spareName || !price || !customerName){
     alert("Barcha maydonlarni to‘ldiring");
-    btn.disabled=false;
-    btn.innerText="Saqlash";
     return;
   }
 
-  const debtRef=db
-    .collection("users")
-    .doc(currentUID)
-    .collection("debts")
-    .doc(customerName);
+  btn.disabled=true;
+  btn.innerText="Saqlanmoqda...";
 
   try{
+
+    const debtRef=db
+      .collection("users")
+      .doc(currentUID)
+      .collection("debts")
+      .doc(customerName);
 
     const doc=await debtRef.get();
 
@@ -195,7 +194,7 @@ async function saveDebt(){
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    location.href="dashboard.html";
+    window.location.href="dashboard.html";
 
   }catch(error){
     console.error(error);
@@ -203,6 +202,12 @@ async function saveDebt(){
     btn.disabled=false;
     btn.innerText="Saqlash";
   }
+}
+
+/* ================= BACK ================= */
+
+function goBack(){
+  window.location.href="dashboard.html";
 }
 
 </script>
