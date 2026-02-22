@@ -16,9 +16,20 @@ body{
   background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
   color:white;
   padding:20px;
+  animation:fadeIn 0.5s ease forwards;
 }
 
-h2{text-align:center;margin-bottom:30px;}
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+h2{
+  text-align:center;
+  margin-bottom:30px;
+  font-size:24px;
+  font-weight:600;
+}
 
 .stats{
   display:grid;
@@ -32,6 +43,25 @@ h2{text-align:center;margin-bottom:30px;}
   padding:22px;
   border-radius:22px;
   backdrop-filter:blur(15px);
+  box-shadow:0 15px 40px rgba(0,0,0,0.5);
+  transition:all 0.25s ease;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 20px 50px rgba(0,0,0,0.7);
+}
+
+.card h3{
+  margin:0 0 10px;
+  font-size:13px;
+  opacity:0.7;
+}
+
+.card p{
+  font-size:20px;
+  font-weight:600;
+  margin:0;
 }
 
 .customer{
@@ -39,11 +69,36 @@ h2{text-align:center;margin-bottom:30px;}
   padding:22px;
   border-radius:22px;
   margin-bottom:20px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.4);
+  animation:slideUp 0.4s ease forwards;
 }
 
-.section-title{margin-top:14px;font-size:12px;opacity:0.6;}
-.item-line{font-size:13px;margin:5px 0;}
-.payment-line{font-size:13px;color:#22c55e;margin:5px 0;}
+@keyframes slideUp{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.customer h4{
+  margin:0 0 10px;
+}
+
+.section-title{
+  margin-top:14px;
+  font-size:12px;
+  opacity:0.6;
+}
+
+.item-line{
+  font-size:13px;
+  margin:5px 0;
+}
+
+.payment-line{
+  font-size:13px;
+  color:#22c55e;
+  margin:5px 0;
+}
 
 .pay-btn{
   margin-top:15px;
@@ -55,6 +110,12 @@ h2{text-align:center;margin-bottom:30px;}
   font-weight:600;
   background:linear-gradient(90deg,#22c55e,#16a34a);
   color:white;
+  transition:all 0.25s ease;
+}
+
+.pay-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 25px rgba(34,197,94,0.5);
 }
 
 .back-btn{
@@ -67,55 +128,15 @@ h2{text-align:center;margin-bottom:30px;}
   color:white;
   font-size:16px;
   cursor:pointer;
-}
-
-/* ===== PAYMENT MODAL ===== */
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(6px);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-
-.modal-box{
-  background:linear-gradient(135deg,#1e293b,#0f172a);
-  padding:30px;
-  border-radius:22px;
-  width:90%;
-  max-width:380px;
-}
-
-.modal-box input{
-  width:100%;
-  padding:14px;
-  margin-top:15px;
-  border-radius:12px;
-  border:none;
-  font-size:16px;
-}
-
-.modal-buttons{
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-
-.modal-buttons button{
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
   font-weight:600;
+  transition:all 0.25s ease;
 }
 
-.cancel{background:#ef4444;color:white;}
-.confirm{background:#22c55e;color:white;}
+.back-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 35px rgba(59,130,246,0.5);
+}
+
 </style>
 </head>
 
@@ -128,6 +149,7 @@ h2{text-align:center;margin-bottom:30px;}
     <h3>📦 Jami nasiya tovar</h3>
     <p id="totalItems">0 ta</p>
   </div>
+
   <div class="card">
     <h3>💰 Umumiy nasiya summa</h3>
     <p id="totalDebt">0 so‘m</p>
@@ -150,7 +172,6 @@ const firebaseConfig={
   appId:"1:960113811021:web:8ae1451d3cba1148a0c604"
 };
 
-
 if(!firebase.apps.length){
   firebase.initializeApp(firebaseConfig);
 }
@@ -158,10 +179,11 @@ if(!firebase.apps.length){
 const auth=firebase.auth();
 const db=firebase.firestore();
 
-let selectedCustomer=null;
-
 auth.onAuthStateChanged(user=>{
-  if(!user){ location.href="index.html"; return; }
+  if(!user){
+    location.href="index.html";
+    return;
+  }
   loadNasiya(user.uid);
 });
 
@@ -173,60 +195,94 @@ function loadNasiya(uid){
   const list=document.getElementById("customerList");
   list.innerHTML="";
 
-  db.collection("users").doc(uid).collection("debts").get()
-  .then(snapshot=>{
+  db.collection("users")
+    .doc(uid)
+    .collection("debts")
+    .get()
+    .then(snapshot=>{
 
-    snapshot.forEach(async doc=>{
+      if(snapshot.empty){
+        list.innerHTML="<p style='opacity:0.6'>Nasiya yo‘q</p>";
+      }
 
-      const data=doc.data();
-      const name=doc.id;
+      snapshot.forEach(async doc=>{
 
-      const debt=Number(data.totalDebt||0);
-      const itemsCount=Number(data.totalItems||0);
+        const data=doc.data();
+        const name=doc.id;
 
-      totalDebt+=debt;
-      totalItems+=itemsCount;
+        const debt=Number(data.totalDebt||0);
+        const itemsCount=Number(data.totalItems||0);
 
-      const div=document.createElement("div");
-      div.className="customer";
-      div.innerHTML=`
-        <h4>👤 ${name}</h4>
-        <p>📦 ${itemsCount} ta | 💰 ${debt.toLocaleString()} so‘m</p>
-        <div id="items-${name}"></div>
-        <div id="payments-${name}"></div>
+        totalDebt+=debt;
+        totalItems+=itemsCount;
+
+        const div=document.createElement("div");
+        div.className="customer";
+        div.innerHTML=`
+          <h4>👤 ${name}</h4>
+          <p>📦 ${itemsCount} ta | 💰 ${debt.toLocaleString()} so‘m</p>
+          <div class="section-title">🛒 Olingan mahsulotlar:</div>
+          <div id="items-${name}"></div>
+          <div class="section-title">💸 To‘lovlar:</div>
+          <div id="payments-${name}"></div>
         <button class="pay-btn" onclick="openModal('${name}')">💸 To‘landi</button>
-      `;
-      list.appendChild(div);
+        `;
+        list.appendChild(div);
+
+        const itemsSnap=await db.collection("users").doc(uid)
+          .collection("debts").doc(name)
+          .collection("items")
+          .orderBy("createdAt","desc").get();
+
+        const itemsContainer=document.getElementById("items-"+name);
+
+        itemsSnap.forEach(itemDoc=>{
+          const item=itemDoc.data();
+          const date=item.createdAt?item.createdAt.toDate().toLocaleString("uz-UZ"):"";
+          itemsContainer.innerHTML+=`
+            <div class="item-line">
+              • ${item.spareName} - ${item.price.toLocaleString()} so‘m
+              <span style="opacity:0.5">(${date})</span>
+            </div>`;
+        });
+
+        const paySnap=await db.collection("users").doc(uid)
+          .collection("debts").doc(name)
+          .collection("payments")
+          .orderBy("createdAt","desc").get();
+
+        const payContainer=document.getElementById("payments-"+name);
+
+        paySnap.forEach(payDoc=>{
+          const p=payDoc.data();
+          const date=p.createdAt?p.createdAt.toDate().toLocaleString("uz-UZ"):"";
+          payContainer.innerHTML+=`
+            <div class="payment-line">
+              • ${p.amount.toLocaleString()} so‘m
+              <span style="opacity:0.5">(${date})</span>
+            </div>`;
+        });
+
+      });
+
+      document.getElementById("totalDebt").innerText=
+        totalDebt.toLocaleString()+" so‘m";
+
+      document.getElementById("totalItems").innerText=
+        totalItems+" ta";
+
     });
-
-    document.getElementById("totalDebt").innerText=totalDebt.toLocaleString()+" so‘m";
-    document.getElementById("totalItems").innerText=totalItems+" ta";
-  });
 }
 
-/* ===== MODAL ===== */
 
-function openModal(customerName){
-  selectedCustomer=customerName;
-  document.getElementById("modalCustomer").innerText="Mijoz: "+customerName;
-  document.getElementById("paymentAmount").value="";
-  document.getElementById("paymentModal").style.display="flex";
-}
-
-function closeModal(){
-  document.getElementById("paymentModal").style.display="none";
-}
-
-async function confirmPayment(){
-
-  const amount=Number(document.getElementById("paymentAmount").value);
-  if(!amount||amount<=0){alert("To‘g‘ri summa kiriting");return;}
 
   const user=auth.currentUser;
   if(!user) return;
 
-  const debtRef=db.collection("users").doc(user.uid)
-    .collection("debts").doc(selectedCustomer);
+  const uid=user.uid;
+
+  const debtRef=db.collection("users").doc(uid)
+    .collection("debts").doc(customerName);
 
   const doc=await debtRef.get();
   if(!doc.exists) return;
@@ -239,37 +295,26 @@ async function confirmPayment(){
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  await db.collection("users").doc(user.uid).collection("sales").add({
-    name:"Nasiya to‘lov ("+selectedCustomer+")",
+  await db.collection("users").doc(uid).collection("sales").add({
+    name:"Nasiya to‘lov ("+customerName+")",
     price:amount,
     type:"payment",
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  if(newDebt<=0){ await debtRef.delete(); }
-  else{
+  if(newDebt<=0){
+    await debtRef.delete();
+  }else{
     await debtRef.update({
       totalDebt:newDebt,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
   }
 
-  closeModal();
   location.reload();
 }
+ 
 </script>
-
-<div id="paymentModal" class="modal">
-  <div class="modal-box">
-    <h3>💳 To‘lov qilish</h3>
-    <p id="modalCustomer"></p>
-    <input type="number" id="paymentAmount" placeholder="Masalan: 100000">
-    <div class="modal-buttons">
-      <button class="cancel" onclick="closeModal()">Bekor qilish</button>
-      <button class="confirm" onclick="confirmPayment()">Tasdiqlash</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
